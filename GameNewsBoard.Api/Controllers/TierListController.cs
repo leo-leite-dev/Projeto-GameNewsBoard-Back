@@ -54,6 +54,7 @@ namespace GameNewsBoard.Api.Controllers
         }
 
         [HttpPut("{tierListId}")]
+        [Authorize]
         public async Task<IActionResult> Update(Guid tierListId, [FromBody] UpdateTierListRequest request)
         {
             try
@@ -75,6 +76,7 @@ namespace GameNewsBoard.Api.Controllers
         }
 
         [HttpDelete("{tierListId}")]
+        [Authorize]
         public async Task<IActionResult> Delete(Guid tierListId)
         {
             try
@@ -96,6 +98,7 @@ namespace GameNewsBoard.Api.Controllers
         }
 
         [HttpPut("{tierListId}/entries")]
+        [Authorize]
         public async Task<IActionResult> SetGameTier(Guid tierListId, [FromBody] TierListEntryRequest request)
         {
             try
@@ -119,6 +122,7 @@ namespace GameNewsBoard.Api.Controllers
         }
 
         [HttpDelete("{tierListId}/remove-game")]
+        [Authorize]
         public async Task<IActionResult> RemoveGame(Guid tierListId, [FromQuery] int gameId)
         {
             try
@@ -161,6 +165,7 @@ namespace GameNewsBoard.Api.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<IActionResult> GetById(Guid id)
         {
             var result = await _tierListService.GetTierListByIdAsync(id);
