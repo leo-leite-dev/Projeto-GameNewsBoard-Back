@@ -1,6 +1,6 @@
 **/bin/
 **/obj/
-appsettings.Development.json
+appsettings.development.json
 .env
 .vscode/
 .idea/

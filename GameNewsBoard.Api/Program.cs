@@ -13,7 +13,6 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 Console.WriteLine(">>> Connection String: " + builder.Configuration.GetConnectionString("DefaultConnection"));
 
-
 // =================== CONFIGURAÇÕES ===================
 
 builder.Services.Configure<NewsDataSettings>(builder.Configuration.GetSection("NewsData"));
@@ -123,10 +122,18 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
 
+// ====== Aqui cria automaticamente a pasta 'uploads' se não existir ======
+var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+if (!Directory.Exists(uploadsPath))
+{
+    Directory.CreateDirectory(uploadsPath);
+    Console.WriteLine($">>> Pasta '/uploads' criada automaticamente.");
+}
+// ==========================================================================
+
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(Directory.GetCurrentDirectory(), "uploads")),
+    FileProvider = new PhysicalFileProvider(uploadsPath),
     RequestPath = "/uploads"
 });
 
