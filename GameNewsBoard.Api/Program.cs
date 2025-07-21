@@ -51,7 +51,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!))
         };
 
-        // Pegando o token do cookie
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
@@ -102,10 +101,14 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
+        policy.WithOrigins(
+                "http://localhost:4200",
+                "https://projeto-game-news-board-front-six.vercel.app",
+                "https://projeto-game-news-board-git-cf6e93-leonardos-projects-706f1137.vercel.app"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
@@ -119,17 +122,21 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+app.UseRouting();
+
+// ✅ Aplica a policy CORS no ponto certo
 app.UseCors("AllowFrontend");
 
-// ====== Aqui cria automaticamente a pasta 'uploads' se não existir ======
+app.UseHttpsRedirection();
+
+// ====== Criação da pasta 'uploads' se não existir ======
 var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
 if (!Directory.Exists(uploadsPath))
 {
     Directory.CreateDirectory(uploadsPath);
     Console.WriteLine($">>> Pasta '/uploads' criada automaticamente.");
 }
-// ==========================================================================
+// ========================================================
 
 app.UseStaticFiles(new StaticFileOptions
 {

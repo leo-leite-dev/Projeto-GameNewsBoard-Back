@@ -8,7 +8,7 @@ COPY . ./
 # Restaura dependências
 RUN dotnet restore
 
-# Publica o projeto API (ajuste o nome do csproj se for diferente)
+# Publica o projeto API
 RUN dotnet publish ./GameNewsBoard.Api/GameNewsBoard.Api.csproj -c Release -o out
 
 # Etapa final
@@ -17,7 +17,10 @@ WORKDIR /app
 
 COPY --from=build /app/out ./
 
-# Porta padrão
+# Define a porta que o app vai escutar
+ENV ASPNETCORE_URLS=http://+:80
+
+# Expõe a porta 80
 EXPOSE 80
 
 # Comando para iniciar a aplicação
