@@ -60,6 +60,8 @@ public class GameReleaseService : IgdbApiBaseService, IGameReleaseService
         var startUnix = new DateTimeOffset(start).ToUnixTimeSeconds();
         var endUnix = new DateTimeOffset(end).ToUnixTimeSeconds();
 
+        _logger.LogInformation("Período filtrado: {Start} até {End}", start, end);
+
         var query = ExternalApiQueryStore.Igdb.GenerateGamesReleasedBetweenQuery(startUnix, endUnix);
         var request = CreateIgdbRequest(query, "games");
 
@@ -78,27 +80,30 @@ public class GameReleaseService : IgdbApiBaseService, IGameReleaseService
 
             var allowedCategories = new[]
             {
-            GameCategory.MainGame,
-            GameCategory.Remake,
-            GameCategory.Remaster
-        };
+                GameCategory.MainGame,
+                GameCategory.Remake,
+                GameCategory.Remaster
+            };
 
             var filteredGames = igdbGames
                 .Where(g =>
-                    g.Category.HasValue && allowedCategories.Contains(g.Category.Value)
-                    &&
+                    g.Category.HasValue &&
+                    allowedCategories.Contains(g.Category.Value) &&
                     (
                         platform == null ||
+                        platform == PlatformFamily.All ||
                         (
                             g.Platforms != null &&
                             (
                                 PlatformLineage.XboxFamily.ContainsKey(platform.Value)
                                     ? g.Platforms.Any(p => PlatformLineage.XboxFamily[platform.Value].Contains(p.Name))
-                                : PlatformLineage.PlaystationFamily.ContainsKey(platform.Value)
-                                    ? g.Platforms.Any(p => PlatformLineage.PlaystationFamily[platform.Value].Contains(p.Name))
-                                : PlatformLineage.NintendoFamily.ContainsKey(platform.Value)
-                                    ? g.Platforms.Any(p => PlatformLineage.NintendoFamily[platform.Value].Contains(p.Name))
-                                : true
+                                    : PlatformLineage.PlaystationFamily.ContainsKey(platform.Value)
+                                        ? g.Platforms.Any(p => PlatformLineage.PlaystationFamily[platform.Value].Contains(p.Name))
+                                        : PlatformLineage.NintendoFamily.ContainsKey(platform.Value)
+                                            ? g.Platforms.Any(p => PlatformLineage.NintendoFamily[platform.Value].Contains(p.Name))
+                                            : PlatformLineage.MicrosoftFamily.ContainsKey(platform.Value)
+                                                ? g.Platforms.Any(p => PlatformLineage.MicrosoftFamily[platform.Value].Contains(p.Name))
+                                                : false
                             )
                         )
                     )

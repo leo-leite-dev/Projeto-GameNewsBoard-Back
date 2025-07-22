@@ -36,7 +36,7 @@ namespace GameNewsBoard.Domain.Platforms
     };
         public static readonly Dictionary<PlatformFamily, List<string>> MicrosoftFamily = new()
     {
-        { PlatformFamily.FamilyMicrosoft, new(){"Xbox Series X|S", "Xbox One, PC (Microsoft Windows)"}},
+        { PlatformFamily.FamilyMicrosoft, new(){"PC (Microsoft Windows)"}},
     };
         public static readonly Dictionary<PlatformFamily, List<string>> XboxFamily = new()
     {
