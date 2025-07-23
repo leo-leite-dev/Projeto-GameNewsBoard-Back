@@ -15,13 +15,24 @@ namespace GameNewsBoard.Infrastructure.Services.Auth
 
         public void SetJwtCookie(HttpResponse response, string token, TimeSpan expiration)
         {
-            response.Cookies.Append("jwtToken", token, new CookieOptions
+            var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = _isProduction,
-                SameSite = _isProduction ? SameSiteMode.Strict : SameSiteMode.Lax,
-                Expires = DateTime.UtcNow.Add(expiration)
-            });
+                Expires = DateTimeOffset.UtcNow.Add(expiration)
+            };
+
+            if (_isProduction)
+            {
+                cookieOptions.Secure = true;
+                cookieOptions.SameSite = SameSiteMode.None;
+            }
+            else
+            {
+                cookieOptions.Secure = false;
+                cookieOptions.SameSite = SameSiteMode.Lax;
+            }
+
+            response.Cookies.Append("jwtToken", token, cookieOptions);
         }
 
         public void ClearJwtCookie(HttpResponse response)

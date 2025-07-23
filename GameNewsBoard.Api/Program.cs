@@ -124,7 +124,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseRouting();
 
-// ✅ Aplica a policy CORS no ponto certo
 app.UseCors("AllowFrontend");
 
 app.UseHttpsRedirection();
