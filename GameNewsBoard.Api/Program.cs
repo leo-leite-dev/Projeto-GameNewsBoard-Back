@@ -103,7 +103,7 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(
                 "http://localhost:4200",
-                "https://projeto-game-news-board-front-six.vercel.app",
+                "https://projeto-game-news-board-front-snowy.vercel.app",
                 "https://projeto-game-news-board-git-cf6e93-leonardos-projects-706f1137.vercel.app"
             )
             .AllowAnyHeader()
