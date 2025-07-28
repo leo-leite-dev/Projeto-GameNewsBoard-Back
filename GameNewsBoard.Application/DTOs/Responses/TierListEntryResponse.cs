@@ -1,3 +1,4 @@
+using GameNewsBoard.Application.DTOs.Responses;
 using GameNewsBoard.Domain.Enums;
 
 namespace GameNewsBoard.Application.Responses.DTOs.Responses;

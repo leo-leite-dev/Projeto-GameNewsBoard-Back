@@ -32,7 +32,7 @@ namespace GameNewsBoard.Domain.Platforms
         { Platform.Wii, new() { "Super Nintendo", "Wii" } },
         { Platform.WiiU, new() { "Super Nintendo", "Wii", "Wii U" } },
         { Platform.Nintendo3DS, new() { "Super Nintendo", "Wii", "Wii U", "Nintendo 3DS" } },
-        { Platform.NintendoSwitch, new() { "Super Nintendo", "Wii", "Wii U", "Nintendo 3DS", "Nintendo Switch" } }
+        { Platform.NintendoSwitch, new() { "Super Nintendo", "Wii", "Wii U", "Nintendo 3DS", "Nintendo Switch", "Nintendo Switch 2" } }
     };
         public static readonly Dictionary<PlatformFamily, List<string>> MicrosoftFamily = new()
     {
@@ -49,7 +49,7 @@ namespace GameNewsBoard.Domain.Platforms
     };
         public static readonly Dictionary<PlatformFamily, List<string>> NintendoFamily = new()
     {
-        { PlatformFamily.FamilyNintendo, new() { "Nintendo Switch 2", "Nintendo Switch 2" } },
+        { PlatformFamily.FamilyNintendo, new() { "Nintendo Switch", "Nintendo Switch 2" } },
     };
     }
 }

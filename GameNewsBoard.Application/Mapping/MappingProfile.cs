@@ -1,7 +1,7 @@
 using System.Globalization;
 using AutoMapper;
 using GameNewsBoard.Application.DTOs;
-using GameNewsBoard.Application.Responses.DTOs;
+using GameNewsBoard.Application.DTOs.Responses;
 using GameNewsBoard.Application.Responses.DTOs.Responses;
 using GameNewsBoard.Domain.Entities;
 
@@ -12,14 +12,14 @@ namespace GameNewsBoard.Application.Mapping
         public MappingProfile()
         {
             CreateMap<GameResponse, Game>()
-                .ForMember(dest => dest.Released, opt => opt.MapFrom(src => ParseDate(src.Released)))
+                .ForMember(dest => dest.Released, opt => opt.MapFrom(src => ParseDate(src.ReleaseDate)))
                 .ForMember(dest => dest.Id, opt => opt.Ignore());
 
             CreateMap<Game, GameDTO>()
-                .ForMember(dest => dest.Released, opt => opt.MapFrom(src => src.Released.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)));
+                .ForMember(dest => dest.ReleaseDate, opt => opt.MapFrom(src => src.Released.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)));
 
             CreateMap<Game, GameResponse>()
-                .ForMember(dest => dest.Released, opt => opt.MapFrom(src => src.Released.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)));
+                .ForMember(dest => dest.ReleaseDate, opt => opt.MapFrom(src => src.Released.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)));
 
             CreateMap<TierList, TierListResponse>();
             CreateMap<TierListEntry, TierListEntryResponse>();

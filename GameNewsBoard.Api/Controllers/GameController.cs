@@ -5,6 +5,7 @@ using GameNewsBoard.Application.Responses.DTOs;
 using GameNewsBoard.Application.DTOs;
 using GameNewsBoard.Api.Helpers;
 using GameNewsBoard.Domain.Enums;
+using GameNewsBoard.Application.DTOs.Responses;
 
 namespace GameNewsBoard.Api.Controllers;
 

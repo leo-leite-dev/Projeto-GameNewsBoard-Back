@@ -1,5 +1,6 @@
 using System.Globalization;
 using AutoMapper;
+using GameNewsBoard.Application.DTOs.Responses;
 using GameNewsBoard.Application.Responses.DTOs;
 using GameNewsBoard.Application.Responses.DTOs.Responses;
 using GameNewsBoard.Domain.Entities;
@@ -42,7 +43,7 @@ namespace GameNewsBoard.Application.Mapping
                         ? $"https:{src.Cover.Url}"
                         : string.Empty))
                 .ForMember(dest => dest.Rating, opt => opt.MapFrom(src => src.AggregatedRating ?? src.UserRating ?? 0))
-                .ForMember(dest => dest.Released, opt => opt.MapFrom(src =>
+                .ForMember(dest => dest.ReleaseDate, opt => opt.MapFrom(src =>
                     src.FirstReleaseDateUnix.HasValue
                         ? DateTimeOffset.FromUnixTimeSeconds(src.FirstReleaseDateUnix.Value).ToString("dd/MM/yyyy")
                         : "Unavailable"))
@@ -52,8 +53,8 @@ namespace GameNewsBoard.Application.Mapping
                         : "Unknown"))
                 .ForMember(dest => dest.Id, opt => opt.Ignore());
 
-            // Releases
             CreateMap<IgdbGameReleaseDto, GameReleaseResponse>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Name))
                 .ForMember(dest => dest.Platform, opt => opt.MapFrom(src =>
                     src.Platforms != null && src.Platforms.Any()

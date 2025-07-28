@@ -1,12 +1,12 @@
 using AutoMapper;
 using GameNewsBoard.Application.DTOs;
+using GameNewsBoard.Application.DTOs.Responses;
 using GameNewsBoard.Application.DTOs.Shared;
 using GameNewsBoard.Application.Exceptions;
 using GameNewsBoard.Application.Exceptions.Api;
 using GameNewsBoard.Application.Exceptions.Domain;
 using GameNewsBoard.Application.IRepository;
 using GameNewsBoard.Application.IServices;
-using GameNewsBoard.Application.Responses.DTOs;
 using GameNewsBoard.Application.Validators;
 using GameNewsBoard.Domain.Entities;
 using GameNewsBoard.Domain.Enums;

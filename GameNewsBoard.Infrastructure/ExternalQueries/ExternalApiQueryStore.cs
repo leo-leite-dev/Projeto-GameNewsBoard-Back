@@ -1,5 +1,4 @@
 using System.Text;
-using GameNewsBoard.Domain.Enums;
 
 namespace GameNewsBoard.Infrastructure.Queries
 {
@@ -27,14 +26,23 @@ namespace GameNewsBoard.Infrastructure.Queries
                     offset {offset};";
             }
 
-            public static string GenerateGamesReleasedBetweenQuery(long startUnix, long endUnix, int limit = 500)
+            public static string GenerateGamesReleasedBetweenQuery(
+                long startUnix, long endUnix, IEnumerable<int>? platformIds = null,
+                int limit = 500)
             {
-                var whereClause = $"first_release_date >= {startUnix} & first_release_date <= {endUnix}";
+                var whereClause = new StringBuilder();
+                whereClause.Append($"first_release_date >= {startUnix} & first_release_date <= {endUnix}");
+
+                if (platformIds != null && platformIds.Any())
+                {
+                    var platformList = string.Join(",", platformIds);
+                    whereClause.Append($" & platforms != null & platforms = ({platformList})");
+                }
 
                 var sb = new StringBuilder();
                 sb.AppendLine("fields name, cover.url, platforms.id, platforms.name, first_release_date, category;");
                 sb.AppendLine($"where {whereClause};");
-                sb.AppendLine("sort first_release_date asc;");
+                sb.AppendLine("sort first_release_date desc;");
                 sb.AppendLine($"limit {limit};");
 
                 return sb.ToString();

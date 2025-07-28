@@ -6,6 +6,8 @@ namespace GameNewsBoard.Infrastructure.ExternalDtos
 {
     public class IgdbGameReleaseDto
     {
+        [JsonPropertyName("id")]
+        public long Id { get; set; }
         public string Name { get; set; } = string.Empty;
 
         [JsonPropertyName("first_release_date")]
