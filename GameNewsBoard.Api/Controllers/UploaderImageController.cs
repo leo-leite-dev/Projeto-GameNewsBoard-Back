@@ -1,6 +1,7 @@
 using GameNewsBoard.Api.Helpers;
 using GameNewsBoard.Application.IServices;
 using GameNewsBoard.Application.Services;
+using GameNewsBoard.Infrastructure.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
