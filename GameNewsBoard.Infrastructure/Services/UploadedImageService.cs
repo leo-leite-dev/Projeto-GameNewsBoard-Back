@@ -1,6 +1,7 @@
 using GameNewsBoard.Application.IServices;
 using GameNewsBoard.Domain.Commons;
 using GameNewsBoard.Domain.Entities;
+using GameNewsBoard.Domain.Enums;
 using GameNewsBoard.Domain.IStorage;
 
 namespace GameNewsBoard.Infrastructure.Services;
@@ -18,12 +19,17 @@ public class UploadedImageService : IUploadedImageService
         _imageStorageService = imageStorageService ?? throw new ArgumentNullException(nameof(imageStorageService));
     }
 
-    public async Task<Result<UploadedImageDto>> RegisterImageAsync(Guid userId, string url)
+    public async Task<Result<UploadedImageDto>> RegisterImageAsync(Guid userId, Stream fileStream, string originalFileName, string contentType, ImageBucketCategory category)
     {
+        var fileExtension = Path.GetExtension(originalFileName);
+        var fileName = $"{Guid.NewGuid()}{fileExtension}";
+
+        var imageUrl = await _imageStorageService.UploadImageAsync(fileStream, fileName, contentType, userId, category);
+
         var image = new UploadedImage
         {
             UserId = userId,
-            Url = url
+            Url = imageUrl
         };
 
         await _uploadedImageRepository.AddAsync(image);
@@ -55,7 +61,7 @@ public class UploadedImageService : IUploadedImageService
         if (image.IsUsed)
             return Result.Failure("Imagem já foi utilizada e não pode ser removida.");
 
-        var filePath = image.Url.Replace("/uploads/", "");
+        var filePath = image.Url.Replace($"{_imageStorageService.BasePublicUrl}/", "");
         await _imageStorageService.DeleteImageAsync(filePath);
 
         await _uploadedImageRepository.DeleteAsync(image);

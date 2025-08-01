@@ -28,7 +28,7 @@ namespace GameNewsBoard.Infrastructure.Services
 
         public async Task<GameNewsResponse> GetLatestNewsAsync(string platform)
         {
-            var url = ExternalApiUrlBuilder.BuildNewsApiUrl(_baseUrl, _apiKey, platform);
+            var url = IgdbApiUrlBuilder.BuildNewsApiUrl(_baseUrl, _apiKey, platform);
 
             var response = await _httpClient.GetAsync(url);
             var content = await response.Content.ReadAsStringAsync();

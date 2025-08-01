@@ -6,15 +6,15 @@ using GameNewsBoard.Infrastructure.Configurations;
 using GameNewsBoard.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// ========== LOG de conexão ==========
 Console.WriteLine(">>> Connection String: " + builder.Configuration.GetConnectionString("DefaultConnection"));
 
-// =================== CONFIGURAÇÕES ===================
-
+// ========== CONFIGURAÇÕES ==========
 builder.Services.Configure<NewsDataSettings>(builder.Configuration.GetSection("NewsData"));
 builder.Services.Configure<BackendSettings>(builder.Configuration.GetSection("Backend"));
 builder.Services.Configure<IgdbSettings>(builder.Configuration.GetSection("Igdb"));
@@ -22,17 +22,14 @@ builder.Services.AddAutoMapper(typeof(MappingProfile), typeof(ExternalMappingPro
 builder.Services.AddHttpClient();
 builder.Services.AddControllers();
 
-// =================== DB CONTEXT ===================
-
+// ========== DB CONTEXT ==========
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// =================== REGISTROS DE SERVIÇOS ===================
+// ========== REGISTRO DE SERVIÇOS ==========
+builder.Services.AddInfrastructureServices(); // Inclui UserService, TokenService, etc.
 
-builder.Services.AddInfrastructureServices(); // Inclui UserService, TokenService, CookieService, etc.
-
-// =================== CONFIGURAÇÃO JWT ===================
-
+// ========== CONFIGURAÇÃO JWT ==========
 var jwtKey = builder.Configuration["Jwt:Key"];
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"];
@@ -66,8 +63,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
-// =================== SWAGGER ===================
-
+// ========== SWAGGER ==========
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -95,8 +91,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// =================== CORS ===================
-
+// ========== CORS ==========
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -112,8 +107,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-// =================== BUILD E PIPELINE ===================
-
+// ========== BUILD E PIPELINE ==========
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -128,20 +122,12 @@ app.UseCors("AllowFrontend");
 
 app.UseHttpsRedirection();
 
-// ====== Criação da pasta 'uploads' se não existir ======
-var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
-if (!Directory.Exists(uploadsPath))
-{
-    Directory.CreateDirectory(uploadsPath);
-    Console.WriteLine($">>> Pasta '/uploads' criada automaticamente.");
-}
-// ========================================================
+// ========== VERIFICAÇÃO SUPABASE ENV VAR ==========
+var supabaseUrl = Environment.GetEnvironmentVariable("SUPABASE_URL");
+var supabaseKey = Environment.GetEnvironmentVariable("SUPABASE_KEY");
 
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(uploadsPath),
-    RequestPath = "/uploads"
-});
+if (string.IsNullOrWhiteSpace(supabaseUrl) || string.IsNullOrWhiteSpace(supabaseKey))
+    Console.WriteLine("⚠️ SUPABASE_URL ou SUPABASE_KEY não estão definidas!");
 
 app.UseMiddleware<JwtMiddleware>();
 app.UseAuthentication();

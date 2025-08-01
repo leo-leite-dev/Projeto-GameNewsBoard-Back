@@ -1,7 +1,6 @@
 using GameNewsBoard.Application.IRepository;
 using GameNewsBoard.Application.IServices;
 using GameNewsBoard.Application.IServices.Auth;
-using GameNewsBoard.Application.Services;
 using GameNewsBoard.Domain.IStorage;
 using GameNewsBoard.Infrastructure.Auth;
 using GameNewsBoard.Infrastructure.Repositories;
@@ -28,7 +27,6 @@ namespace GameNewsBoard.Infrastructure.Services
             services.AddScoped<IAuthService, AuthService>();
 
             services.AddScoped<IImageStorageService, SupabaseImageStorageService>();
-            services.AddScoped<ImageService>();
 
             //TierList
             services.AddScoped<ITierListService, TierListService>();

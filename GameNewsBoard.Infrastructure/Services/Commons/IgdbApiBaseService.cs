@@ -22,7 +22,7 @@ namespace GameNewsBoard.Infrastructure.Commons
 
         protected HttpRequestMessage CreateIgdbRequest(string query, string endpoint)
         {
-            var url = ExternalApiUrlBuilder.BuildIgdbUrl(endpoint);
+            var url = IgdbApiUrlBuilder.BuildIgdbUrl(endpoint);
             var request = new HttpRequestMessage(HttpMethod.Post, url);
             request.Headers.Add("Client-ID", _clientId);
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
