@@ -1,11 +1,11 @@
 using GameNewsBoard.Application.IRepository;
 using GameNewsBoard.Application.IServices;
 using GameNewsBoard.Application.IServices.Auth;
-using GameNewsBoard.Application.IServices.Images;
+using GameNewsBoard.Application.Services;
+using GameNewsBoard.Domain.IStorage;
 using GameNewsBoard.Infrastructure.Auth;
 using GameNewsBoard.Infrastructure.Repositories;
 using GameNewsBoard.Infrastructure.Services.Auth;
-using GameNewsBoard.Infrastructure.Services.Image;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace GameNewsBoard.Infrastructure.Services
@@ -27,6 +27,9 @@ namespace GameNewsBoard.Infrastructure.Services
 
             services.AddScoped<IAuthService, AuthService>();
 
+            services.AddScoped<IImageStorageService, SupabaseImageStorageService>();
+            services.AddScoped<ImageService>();
+
             //TierList
             services.AddScoped<ITierListService, TierListService>();
             services.AddScoped<ITierListRepository, TierListRepository>();
@@ -37,7 +40,6 @@ namespace GameNewsBoard.Infrastructure.Services
 
             services.AddScoped<IUploadedImageService, UploadedImageService>();
             services.AddScoped<IUploadedImageRepository, UploadedImageRepository>();
-            services.AddScoped<IPhysicalImageService, PhysicalImageService>();
         }
     }
 }

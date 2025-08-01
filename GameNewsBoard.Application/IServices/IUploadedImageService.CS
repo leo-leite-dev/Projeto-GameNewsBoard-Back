@@ -1,6 +1,6 @@
 using GameNewsBoard.Domain.Commons;
 
-namespace GameNewsBoard.Application.IServices.Images
+namespace GameNewsBoard.Application.IServices
 {
     public interface IUploadedImageService
     {

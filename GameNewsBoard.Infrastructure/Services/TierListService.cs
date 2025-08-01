@@ -2,10 +2,10 @@ using AutoMapper;
 using GameNewsBoard.Application.DTOs.Requests;
 using GameNewsBoard.Application.IRepository;
 using GameNewsBoard.Application.IServices;
-using GameNewsBoard.Application.IServices.Images;
 using GameNewsBoard.Application.Responses.DTOs.Responses;
 using GameNewsBoard.Domain.Commons;
 using GameNewsBoard.Domain.Entities;
+using GameNewsBoard.Domain.IStorage;
 using Microsoft.Extensions.Logging;
 
 namespace GameNewsBoard.Infrastructure.Services
@@ -15,7 +15,7 @@ namespace GameNewsBoard.Infrastructure.Services
         private readonly ITierListRepository _tierListRepository;
         private readonly IGameRepository _gameRepository;
         private readonly IUploadedImageRepository _uploadedImageRepository;
-        private readonly IPhysicalImageService _physicalImageService;
+        private readonly IImageStorageService _imageStorageService;
         private readonly IMapper _mapper;
         private readonly ILogger<TierListService> _logger;
 
@@ -23,19 +23,20 @@ namespace GameNewsBoard.Infrastructure.Services
             ITierListRepository tierListRepository,
             IGameRepository gameRepository,
             IUploadedImageRepository uploadedImageRepository,
-            IPhysicalImageService physicalImageService,
+            IImageStorageService imageStorageService,
             IMapper mapper,
             ILogger<TierListService> logger)
         {
             _tierListRepository = tierListRepository ?? throw new ArgumentNullException(nameof(tierListRepository));
             _gameRepository = gameRepository ?? throw new ArgumentNullException(nameof(gameRepository));
             _uploadedImageRepository = uploadedImageRepository ?? throw new ArgumentNullException(nameof(uploadedImageRepository));
-            _physicalImageService = physicalImageService ?? throw new ArgumentNullException(nameof(physicalImageService));
+            _imageStorageService = imageStorageService ?? throw new ArgumentNullException(nameof(imageStorageService));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         #region Tier Methods
+
         public async Task<Result> CreateTierListAsync(Guid userId, TierListRequest request)
         {
             try
@@ -105,7 +106,7 @@ namespace GameNewsBoard.Infrastructure.Services
                     if (image != null)
                     {
                         _uploadedImageRepository.Remove(image);
-                        await _physicalImageService.DeleteFileAsync(image.Url);
+                        await _imageStorageService.DeleteImageAsync(image.Url);
                     }
                 }
 
@@ -127,9 +128,11 @@ namespace GameNewsBoard.Infrastructure.Services
             var response = _mapper.Map<IEnumerable<TierListResponse>>(tiers);
             return Result<IEnumerable<TierListResponse>>.Success(response);
         }
+
         #endregion
 
         #region Game In Tier Methods
+
         public async Task<Result> SetGameTierAsync(Guid tierListId, TierListEntryRequest request)
         {
             try

@@ -1,55 +1,65 @@
-using GameNewsBoard.Application.DTOs.Requests;
 using GameNewsBoard.Api.Helpers;
-using Microsoft.AspNetCore.Mvc;
+using GameNewsBoard.Application.IServices;
+using GameNewsBoard.Application.Services;
 using Microsoft.AspNetCore.Authorization;
-using GameNewsBoard.Infrastructure.Auth;
-using GameNewsBoard.Application.IServices.Images;
+using Microsoft.AspNetCore.Mvc;
 
-namespace GameNewsBoard.Api.Controllers
+namespace GameNewsBoard.Api.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class UploadedImageController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class UploadedImageController : ControllerBase
-    {
-        private readonly IUploadedImageService _uploadedImageService;
-        private readonly IPhysicalImageService _physicalImageService;
-        private readonly ILogger<UploadedImageController> _logger;
+    private readonly ImageService _imageService;
+    private readonly IUploadedImageService _uploadedImageService;
+    private readonly ILogger<UploadedImageController> _logger;
 
-        public UploadedImageController(
-            IUploadedImageService uploadedImageService,
-            IPhysicalImageService physicalImageService,
-            ILogger<UploadedImageController> logger)
+    public UploadedImageController(
+        ImageService imageService,
+        IUploadedImageService uploadedImageService,
+        ILogger<UploadedImageController> logger)
+    {
+        _imageService = imageService ?? throw new ArgumentNullException(nameof(imageService));
+        _uploadedImageService = uploadedImageService ?? throw new ArgumentNullException(nameof(uploadedImageService));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
+
+    [HttpPost("upload")]
+    [Authorize]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> UploadImage(IFormFile image)
+    {
+        if (image == null || image.Length == 0)
         {
-            _uploadedImageService = uploadedImageService ?? throw new ArgumentNullException(nameof(uploadedImageService));
-            _physicalImageService = physicalImageService ?? throw new ArgumentNullException(nameof(physicalImageService));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            return BadRequest(ApiResponseHelper.CreateError(
+                "Imagem ausente", "Nenhuma imagem foi fornecida para upload."));
         }
 
-        [HttpPost("upload")]
-        [Authorize]
-        [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UploadImage([FromForm] UploadImageRequest request)
+        if (image.Length > 5 * 1024 * 1024)
         {
-            var image = request.Image;
+            return BadRequest(ApiResponseHelper.CreateError(
+                "Imagem muito grande", "A imagem excede o tamanho máximo permitido de 5MB."));
+        }
 
-            if (image == null || image.Length == 0)
-                return BadRequest(ApiResponseHelper.CreateError("Imagem ausente", "Imagem não fornecida."));
+        var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
+        if (!allowedTypes.Contains(image.ContentType))
+        {
+            return BadRequest(ApiResponseHelper.CreateError(
+                "Tipo inválido", "O tipo de imagem fornecido não é suportado. Use JPG, PNG ou WebP."));
+        }
 
-            if (image.Length > 5 * 1024 * 1024)
-                return BadRequest(ApiResponseHelper.CreateError("Imagem muito grande", "Imagem excede o tamanho máximo de 5MB."));
-
-            var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
-            if (!allowedTypes.Contains(image.ContentType))
-                return BadRequest(ApiResponseHelper.CreateError("Tipo inválido", "Tipo de imagem não permitido."));
-
+        try
+        {
             var userId = User.GetUserId();
-            var imageId = Guid.NewGuid();
-            var imageUrl = await _physicalImageService.SaveFileAsync(image, imageId.ToString());
+
+            await using var stream = image.OpenReadStream();
+            var imageUrl = await _imageService.UploadAsync(stream, image.FileName, image.ContentType);
 
             var result = await _uploadedImageService.RegisterImageAsync(userId, imageUrl);
 
             if (!result.IsSuccess || result.Value is null)
-                return ApiResponseHelper.CreateError("Falha no upload", result.Error ?? "Erro ao registrar a imagem.");
+                return ApiResponseHelper.CreateError(
+                    "Falha no upload", result.Error ?? "Erro ao registrar a imagem.");
 
             return Ok(ApiResponseHelper.CreateSuccess(new
             {
@@ -57,19 +67,25 @@ namespace GameNewsBoard.Api.Controllers
                 imageUrl = result.Value.Url
             }, "Imagem enviada com sucesso"));
         }
-
-        [HttpDelete("{id:guid}")]
-        [Authorize]
-        public async Task<IActionResult> DeleteImage(Guid id)
+        catch (Exception ex)
         {
-            var userId = User.GetUserId();
-
-            var result = await _uploadedImageService.DeleteImageAsync(userId, id);
-
-            if (!result.IsSuccess)
-                return ApiResponseHelper.CreateError("Erro ao deletar imagem", result.Error);
-
-            return Ok(ApiResponseHelper.CreateSuccess("Imagem deletada com sucesso"));
+            _logger.LogError(ex, "Erro ao enviar imagem");
+            return StatusCode(500, ApiResponseHelper.CreateError(
+                "Erro interno", "Ocorreu um erro inesperado ao enviar a imagem."));
         }
+    }
+
+    [HttpDelete("{id:guid}")]
+    [Authorize]
+    public async Task<IActionResult> DeleteImage(Guid id)
+    {
+        var userId = User.GetUserId();
+
+        var result = await _uploadedImageService.DeleteImageAsync(userId, id);
+
+        if (!result.IsSuccess)
+            return ApiResponseHelper.CreateError("Erro ao deletar imagem", result.Error);
+
+        return Ok(ApiResponseHelper.CreateSuccess("Imagem deletada com sucesso"));
     }
 }
