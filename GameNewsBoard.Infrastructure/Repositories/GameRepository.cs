@@ -2,6 +2,7 @@ using GameNewsBoard.Application.IRepository;
 using GameNewsBoard.Domain.Entities;
 using GameNewsBoard.Domain.Enums;
 using GameNewsBoard.Domain.Platforms;
+using GameNewsBoard.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace GameNewsBoard.Infrastructure.Repositories
@@ -13,6 +14,22 @@ namespace GameNewsBoard.Infrastructure.Repositories
         public GameRepository(AppDbContext context)
         {
             _context = context;
+        }
+
+        public async Task<IEnumerable<Game>> GetByNormalizedTitlesAsync(IEnumerable<string> normalizedTitles)
+        {
+            var allTitles = await _context.Games
+                .Select(g => new { Game = g, Normalized = g.Title.Trim().ToLowerInvariant() })
+                .ToListAsync();
+
+            var normalizedSet = normalizedTitles
+                .Where(t => !string.IsNullOrWhiteSpace(t))
+                .Select(t => t.Trim().ToLowerInvariant())
+                .ToHashSet();
+
+            return allTitles
+                .Where(x => normalizedSet.Contains(x.Normalized))
+                .Select(x => x.Game);
         }
 
         public async Task AddGamesAsync(IEnumerable<Game> games)
@@ -115,7 +132,6 @@ namespace GameNewsBoard.Infrastructure.Repositories
 
             return (games, totalCount);
         }
-
 
         public async Task<List<Game>> GetByTitlesAsync(List<string> titles)
         {

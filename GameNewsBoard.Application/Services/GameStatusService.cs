@@ -1,11 +1,11 @@
 using AutoMapper;
+using GameNewsBoard.Application.Commons;
 using GameNewsBoard.Application.IRepository;
 using GameNewsBoard.Application.IServices;
 using GameNewsBoard.Application.Responses.DTOs.Responses;
 using GameNewsBoard.Domain.Commons;
 using GameNewsBoard.Domain.Entities;
 using GameNewsBoard.Domain.Enums;
-using Microsoft.Extensions.Logging;
 
 namespace GameNewsBoard.Infrastructure.Services
 {
@@ -14,27 +14,23 @@ namespace GameNewsBoard.Infrastructure.Services
         private readonly IGameStatusRepository _gameStatusRepository;
         private readonly IGameRepository _gameRepository;
         private readonly IMapper _mapper;
-        private readonly ILogger<GameStatusService> _logger;
 
         public GameStatusService(
             IGameStatusRepository gameStatusRepository,
             IGameRepository gameRepository,
-            IMapper mapper,
-            ILogger<GameStatusService> logger)
+            IMapper mapper)
         {
             _gameStatusRepository = gameStatusRepository ?? throw new ArgumentNullException(nameof(gameStatusRepository));
             _gameRepository = gameRepository ?? throw new ArgumentNullException(nameof(gameRepository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<Result> SetGameStatusAsync(Guid userId, int gameId, Status status)
         {
-            try
+            return await ServiceExecutionHelper.TryExecuteAsync(async () =>
             {
-                var game = await _gameRepository.GetByIdAsync(gameId);
-                if (game == null)
-                    return Result.Failure("Jogo não encontrado.");
+                var game = await _gameRepository.GetByIdAsync(gameId)
+                           ?? throw new ArgumentException("Jogo não encontrado.");
 
                 var existing = await _gameStatusRepository.GetByUserAndGameAsync(userId, gameId);
 
@@ -49,32 +45,19 @@ namespace GameNewsBoard.Infrastructure.Services
                 }
 
                 await _gameStatusRepository.SaveChangesAsync();
-                return Result.Success();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao definir status para o jogo.");
-                return Result.Failure("Erro ao definir status para o jogo. Tente novamente.");
-            }
+            }, "Erro ao definir status para o jogo. Tente novamente.");
         }
 
         public async Task<Result> RemoveGameStatusAsync(Guid userId, int gameId)
         {
-            try
+            return await ServiceExecutionHelper.TryExecuteAsync(async () =>
             {
-                var gameStatus = await _gameStatusRepository.GetByUserAndGameAsync(userId, gameId);
-                if (gameStatus == null)
-                    return Result.Failure("Status não encontrado.");
+                var gameStatus = await _gameStatusRepository.GetByUserAndGameAsync(userId, gameId)
+                                 ?? throw new ArgumentException("Status não encontrado.");
 
                 _gameStatusRepository.Remove(gameStatus);
                 await _gameStatusRepository.SaveChangesAsync();
-                return Result.Success();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao remover status do jogo.");
-                return Result.Failure("Erro ao remover status do jogo. Tente novamente.");
-            }
+            }, "Erro ao remover status do jogo. Tente novamente.");
         }
 
         public async Task<Result<IEnumerable<GameStatusResponse>>> GetUserGameStatusesAsync(Guid userId)
@@ -83,6 +66,5 @@ namespace GameNewsBoard.Infrastructure.Services
             var result = _mapper.Map<IEnumerable<GameStatusResponse>>(list);
             return Result<IEnumerable<GameStatusResponse>>.Success(result);
         }
-
     }
 }

@@ -6,5 +6,6 @@ namespace GameNewsBoard.Application.Responses.DTOs.Responses
         public string Username { get; set; } = string.Empty;
 
         public List<TierListResponse> Tiers { get; set; } = new(); 
+        public List<GameStatusResponse> GamesSatus { get; set; } = new(); 
     }
 }

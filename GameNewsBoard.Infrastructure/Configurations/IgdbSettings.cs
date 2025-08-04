@@ -1,7 +1,8 @@
-namespace GameNewsBoard.Infrastructure.Configurations;
-
-public class IgdbSettings
+namespace GameNewsBoard.Infrastructure.Configurations
 {
-    public string ClientId { get; set; } = string.Empty;
-    public string AccessToken { get; set; } = string.Empty;
+    public class IgdbSettings
+    {
+        public string ClientId { get; set; } = string.Empty;
+        public string AccessToken { get; set; } = string.Empty;
+    }
 }

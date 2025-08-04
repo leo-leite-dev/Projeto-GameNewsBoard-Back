@@ -40,8 +40,6 @@ namespace GameNewsBoard.Infrastructure.Services
                 tier.ImageUrl = $"{_backendSettings.Url}{tier.ImageUrl}";
             }
 
-            // Em vez de _mapper.Map<UserProfileResponse>(user)
-            // cria manualmente o profile:
             var profile = new UserProfileResponse
             {
                 UserId = user.Id,

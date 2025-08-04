@@ -31,5 +31,10 @@ namespace GameNewsBoard.Application.DTOs.Shared
             Page = page;
             PageSize = pageSize;
         }
+
+        public static PaginatedFromApiResult<T> Empty(int page, int pageSize)
+        {
+            return new PaginatedFromApiResult<T>(new List<T>(), page, pageSize);
+        }
     }
 }

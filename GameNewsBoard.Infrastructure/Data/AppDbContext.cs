@@ -1,7 +1,7 @@
 using GameNewsBoard.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace GameNewsBoard.Infrastructure
+namespace GameNewsBoard.Infrastructure.Data
 {
     public class AppDbContext : DbContext
     {

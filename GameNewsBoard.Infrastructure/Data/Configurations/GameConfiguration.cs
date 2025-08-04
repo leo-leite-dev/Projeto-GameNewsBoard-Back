@@ -2,27 +2,33 @@ using GameNewsBoard.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-public class GameConfiguration : IEntityTypeConfiguration<Game>
+namespace GameNewsBoard.Infrastructure.Data.Configurations
 {
-    public void Configure(EntityTypeBuilder<Game> builder)
+    public class GameConfiguration : IEntityTypeConfiguration<Game>
     {
-        builder.Property(g => g.Title)
-            .IsRequired()
-            .HasMaxLength(255);
+        public void Configure(EntityTypeBuilder<Game> builder)
+        {
+            builder.Property(g => g.Title)
+                .IsRequired()
+                .HasMaxLength(255);
 
-        builder.Property(g => g.Platform)
-            .IsRequired()
-            .HasMaxLength(255);
+            builder.HasIndex(g => g.Title)
+                     .IsUnique();
+                     
+            builder.Property(g => g.Platform)
+                .IsRequired()
+                .HasMaxLength(255);
 
-        builder.Property(g => g.CoverImage)
-            .IsRequired()
-            .HasMaxLength(500);
+            builder.Property(g => g.CoverImage)
+                .IsRequired()
+                .HasMaxLength(500);
 
-        builder.Property(g => g.Rating)
-            .IsRequired();
+            builder.Property(g => g.Rating)
+                .IsRequired();
 
-        builder.Property(g => g.Released)
-            .IsRequired()
-            .HasColumnType("timestamp with time zone");  
+            builder.Property(g => g.Released)
+                .IsRequired()
+                .HasColumnType("timestamp with time zone");
+        }
     }
 }

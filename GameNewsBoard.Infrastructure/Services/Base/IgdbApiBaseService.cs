@@ -4,9 +4,8 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
-namespace GameNewsBoard.Infrastructure.Commons
+namespace GameNewsBoard.Infrastructure.External.IGDB.Base
 {
-
     public abstract class IgdbApiBaseService
     {
         protected readonly HttpClient _httpClient;
@@ -28,9 +27,9 @@ namespace GameNewsBoard.Infrastructure.Commons
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
             request.Content = new StringContent(query, Encoding.UTF8, "text/plain");
             return request;
-        }
 
-        protected async Task<List<T>> SendIgdbRequestAsync<T>(HttpRequestMessage request, CancellationToken cancellationToken)
+        }
+        protected async Task<T> SendIgdbRequestAsync<T>(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             try
             {
@@ -40,10 +39,10 @@ namespace GameNewsBoard.Infrastructure.Commons
                 if (!response.IsSuccessStatusCode)
                     throw new IgdbApiException($"IGDB error: {response.StatusCode}, Response: {content}");
 
-                return JsonSerializer.Deserialize<List<T>>(content, new JsonSerializerOptions
+                return JsonSerializer.Deserialize<T>(content, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
-                }) ?? new List<T>();
+                }) ?? throw new IgdbApiException("Resposta vazia da IGDB.");
             }
             catch (HttpRequestException ex)
             {

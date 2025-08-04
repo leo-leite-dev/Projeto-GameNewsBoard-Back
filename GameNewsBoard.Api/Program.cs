@@ -3,6 +3,7 @@ using GameNewsBoard.Application.Mapping;
 using GameNewsBoard.Application.Settings;
 using GameNewsBoard.Infrastructure;
 using GameNewsBoard.Infrastructure.Configurations;
+using GameNewsBoard.Infrastructure.Data;
 using GameNewsBoard.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -98,7 +99,7 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(
                 "http://localhost:4200",
-                "https://projeto-game-news-board-front-snowy.vercel.app",
+                "https://projeto-game-news-board-front-woad.vercel.app",
                 "https://projeto-game-news-board-git-cf6e93-leonardos-projects-706f1137.vercel.app"
             )
             .AllowAnyHeader()
@@ -120,6 +121,9 @@ app.UseRouting();
 
 app.UseCors("AllowFrontend");
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.UseHttpsRedirection();
 
 // ========== VERIFICAÇÃO SUPABASE ENV VAR ==========
@@ -130,8 +134,6 @@ if (string.IsNullOrWhiteSpace(supabaseUrl) || string.IsNullOrWhiteSpace(supabase
     Console.WriteLine("⚠️ SUPABASE_URL ou SUPABASE_KEY não estão definidas!");
 
 app.UseMiddleware<JwtMiddleware>();
-app.UseAuthentication();
-app.UseAuthorization();
 
 app.MapControllers();
 

@@ -2,7 +2,7 @@ using GameNewsBoard.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace GameNewsBoard.Infrastructure.Persistence.Configurations.Auth
+namespace GameNewsBoard.Infrastructure.Data.Configurations
 {
     public class UserConfiguration : IEntityTypeConfiguration<User>
     {

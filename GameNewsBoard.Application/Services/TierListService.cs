@@ -1,4 +1,5 @@
 using AutoMapper;
+using GameNewsBoard.Application.Commons;
 using GameNewsBoard.Application.DTOs.Requests;
 using GameNewsBoard.Application.IRepository;
 using GameNewsBoard.Application.IServices;
@@ -6,7 +7,6 @@ using GameNewsBoard.Application.Responses.DTOs.Responses;
 using GameNewsBoard.Domain.Commons;
 using GameNewsBoard.Domain.Entities;
 using GameNewsBoard.Domain.IStorage;
-using Microsoft.Extensions.Logging;
 
 namespace GameNewsBoard.Infrastructure.Services
 {
@@ -17,36 +17,26 @@ namespace GameNewsBoard.Infrastructure.Services
         private readonly IUploadedImageRepository _uploadedImageRepository;
         private readonly IImageStorageService _imageStorageService;
         private readonly IMapper _mapper;
-        private readonly ILogger<TierListService> _logger;
 
         public TierListService(
             ITierListRepository tierListRepository,
             IGameRepository gameRepository,
             IUploadedImageRepository uploadedImageRepository,
             IImageStorageService imageStorageService,
-            IMapper mapper,
-            ILogger<TierListService> logger)
+            IMapper mapper)
         {
             _tierListRepository = tierListRepository ?? throw new ArgumentNullException(nameof(tierListRepository));
             _gameRepository = gameRepository ?? throw new ArgumentNullException(nameof(gameRepository));
             _uploadedImageRepository = uploadedImageRepository ?? throw new ArgumentNullException(nameof(uploadedImageRepository));
             _imageStorageService = imageStorageService ?? throw new ArgumentNullException(nameof(imageStorageService));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
-
-        #region Tier Methods
 
         public async Task<Result> CreateTierListAsync(Guid userId, TierListRequest request)
         {
-            try
+            return await ServiceExecutionHelper.TryExecuteAsync(async () =>
             {
-                var tierList = TierList.Create(
-                    userId,
-                    request.Title,
-                    request.ImageId,
-                    request.ImageUrl
-                );
+                var tierList = TierList.Create(userId, request.Title, request.ImageId, request.ImageUrl);
 
                 await _tierListRepository.AddAsync(tierList);
                 await _tierListRepository.SaveChangesAsync();
@@ -61,14 +51,7 @@ namespace GameNewsBoard.Infrastructure.Services
                         await _uploadedImageRepository.SaveChangesAsync();
                     }
                 }
-
-                return Result.Success();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao criar a lista de tiers.");
-                return Result.Failure("Ocorreu um erro ao criar a lista de tiers. Tente novamente mais tarde.");
-            }
+            }, "Ocorreu um erro ao criar a lista de tiers. Tente novamente mais tarde.");
         }
 
         public async Task<Result> UpdateTierListAsync(Guid tierListId, UpdateTierListRequest request)
@@ -77,26 +60,20 @@ namespace GameNewsBoard.Infrastructure.Services
             if (tierList == null)
                 return Result.Failure("Tier não encontrado.");
 
-            try
+            return await ServiceExecutionHelper.TryExecuteAsync(async () =>
             {
                 tierList.UpdateInfo(request.Title, request.ImageUrl);
                 await _tierListRepository.SaveChangesAsync();
-                return Result.Success();
-            }
-            catch (ArgumentException ex)
-            {
-                return Result.Failure(ex.Message);
-            }
+            }, "Erro ao atualizar a tier list.");
         }
 
         public async Task<Result> DeleteTierListAsync(Guid tierListId)
         {
-            try
+            return await ServiceExecutionHelper.TryExecuteAsync(async () =>
             {
                 var tierListData = await _tierListRepository.GetTierWithImageIdAsync(tierListId);
-
                 if (tierListData == null)
-                    return Result.Failure("Tier não encontrado.");
+                    throw new ArgumentException("Tier não encontrado.");
 
                 var (tierList, imageId) = tierListData.Value;
 
@@ -112,14 +89,7 @@ namespace GameNewsBoard.Infrastructure.Services
 
                 _tierListRepository.Remove(tierList);
                 await _tierListRepository.SaveChangesAsync();
-
-                return Result.Success();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao excluir a tier list.");
-                return Result.Failure("Ocorreu um erro ao excluir a tier list. Tente novamente.");
-            }
+            }, "Ocorreu um erro ao excluir a tier list. Tente novamente.");
         }
 
         public async Task<Result<IEnumerable<TierListResponse>>> GetTierListsByUserAsync(Guid userId)
@@ -129,21 +99,15 @@ namespace GameNewsBoard.Infrastructure.Services
             return Result<IEnumerable<TierListResponse>>.Success(response);
         }
 
-        #endregion
-
-        #region Game In Tier Methods
-
         public async Task<Result> SetGameTierAsync(Guid tierListId, TierListEntryRequest request)
         {
-            try
+            return await ServiceExecutionHelper.TryExecuteAsync(async () =>
             {
-                var tierList = await _tierListRepository.GetByIdAsync(tierListId);
-                if (tierList == null)
-                    return Result.Failure("Tier não encontrado.");
+                var tierList = await _tierListRepository.GetByIdAsync(tierListId)
+                               ?? throw new ArgumentException("Tier não encontrado.");
 
-                var game = await _gameRepository.GetByIdAsync(request.GameId);
-                if (game == null)
-                    return Result.Failure("Jogo não encontrado.");
+                var game = await _gameRepository.GetByIdAsync(request.GameId)
+                            ?? throw new ArgumentException("Jogo não encontrado.");
 
                 var existingEntry = tierList.Entries.FirstOrDefault(e => e.GameId == request.GameId);
 
@@ -158,32 +122,19 @@ namespace GameNewsBoard.Infrastructure.Services
                 }
 
                 await _tierListRepository.SaveChangesAsync();
-                return Result.Success();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao definir o tier do jogo.");
-                return Result.Failure("Erro ao definir o tier do jogo. Tente novamente.");
-            }
+            }, "Erro ao definir o tier do jogo. Tente novamente.");
         }
 
         public async Task<Result> RemoveGameFromTierAsync(Guid tierListId, int gameId)
         {
-            try
+            return await ServiceExecutionHelper.TryExecuteAsync(async () =>
             {
-                var tierList = await _tierListRepository.GetByIdAsync(tierListId);
-                if (tierList == null)
-                    return Result.Failure("Tier não encontrado.");
+                var tierList = await _tierListRepository.GetByIdAsync(tierListId)
+                               ?? throw new ArgumentException("Tier não encontrado.");
 
                 tierList.RemoveGameFromTier(gameId);
                 await _tierListRepository.SaveChangesAsync();
-                return Result.Success();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao remover jogo do tier.");
-                return Result.Failure("Erro ao remover jogo do tier. Tente novamente.");
-            }
+            }, "Erro ao remover jogo do tier. Tente novamente.");
         }
 
         public async Task<Result<TierListResponse>> GetTierListByIdAsync(Guid tierListId)
@@ -196,7 +147,5 @@ namespace GameNewsBoard.Infrastructure.Services
             var response = _mapper.Map<TierListResponse>(tierList);
             return Result<TierListResponse>.Success(response);
         }
-
-        #endregion
     }
 }

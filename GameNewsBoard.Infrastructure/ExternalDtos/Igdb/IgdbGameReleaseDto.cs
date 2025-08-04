@@ -2,7 +2,7 @@ using GameNewsBoard.Domain.Enums;
 using GameNewsBoard.Infrastructure.ExternalDtos.Commons;
 using System.Text.Json.Serialization;
 
-namespace GameNewsBoard.Infrastructure.ExternalDtos
+namespace GameNewsBoard.Infrastructure.Igdb.ExternalDtos
 {
     public class IgdbGameReleaseDto
     {

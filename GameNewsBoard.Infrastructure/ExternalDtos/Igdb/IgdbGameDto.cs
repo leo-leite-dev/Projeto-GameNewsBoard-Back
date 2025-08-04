@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using GameNewsBoard.Infrastructure.ExternalDtos.Commons;
 
-namespace GameNewsBoard.Infrastructure.ExternalDtos
+namespace GameNewsBoard.Infrastructure.Igdb.ExternalDtos
 {
     public class IgdbGameDto
     {

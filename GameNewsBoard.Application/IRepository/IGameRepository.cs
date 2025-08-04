@@ -9,5 +9,6 @@ namespace GameNewsBoard.Application.IRepository
         Task<(IEnumerable<Game> games, int totalCount)> GetGamesExclusivePlatformAsync(int platformId, string? searchTerm, int offset, int pageSize, CancellationToken cancellationToken);
         Task<(IEnumerable<Game> games, int totalCount)> GetGamesByYearCategoryAsync(int? startYear, int? endYear, string? searchTerm, int offset, int pageSize, CancellationToken cancellationToken);
         Task<List<Game>> GetByTitlesAsync(List<string> titles);
+        Task<IEnumerable<Game>> GetByNormalizedTitlesAsync(IEnumerable<string> titles);
     }
 }

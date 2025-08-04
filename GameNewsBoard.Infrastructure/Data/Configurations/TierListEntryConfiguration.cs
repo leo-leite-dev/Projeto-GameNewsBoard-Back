@@ -2,25 +2,28 @@ using GameNewsBoard.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-public class TierListEntryConfiguration : IEntityTypeConfiguration<TierListEntry>
+namespace GameNewsBoard.Infrastructure.Data.Configurations
 {
-       public void Configure(EntityTypeBuilder<TierListEntry> builder)
+       public class TierListEntryConfiguration : IEntityTypeConfiguration<TierListEntry>
        {
-              builder.HasKey(e => e.Id);
+              public void Configure(EntityTypeBuilder<TierListEntry> builder)
+              {
+                     builder.HasKey(e => e.Id);
 
-              builder.HasOne(e => e.Game)
-                     .WithMany()
-                     .HasForeignKey(e => e.GameId);
+                     builder.HasOne(e => e.Game)
+                            .WithMany()
+                            .HasForeignKey(e => e.GameId);
 
-              builder.HasOne(e => e.TierList)
-                     .WithMany(t => t.Entries)
-                     .HasForeignKey(e => e.TierListId)
-                     .OnDelete(DeleteBehavior.Cascade);
+                     builder.HasOne(e => e.TierList)
+                            .WithMany(t => t.Entries)
+                            .HasForeignKey(e => e.TierListId)
+                            .OnDelete(DeleteBehavior.Cascade);
 
-              builder.Property(e => e.Tier)
-                     .HasConversion<string>()
-                     .IsRequired();
+                     builder.Property(e => e.Tier)
+                            .HasConversion<string>()
+                            .IsRequired();
 
-              builder.HasIndex(e => new { e.TierListId, e.GameId }).IsUnique();
+                     builder.HasIndex(e => new { e.TierListId, e.GameId }).IsUnique();
+              }
        }
 }

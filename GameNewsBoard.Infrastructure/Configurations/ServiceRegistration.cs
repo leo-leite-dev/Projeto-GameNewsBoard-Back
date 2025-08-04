@@ -1,13 +1,15 @@
 using GameNewsBoard.Application.IRepository;
 using GameNewsBoard.Application.IServices;
 using GameNewsBoard.Application.IServices.Auth;
+using GameNewsBoard.Application.Services;
 using GameNewsBoard.Domain.IStorage;
-using GameNewsBoard.Infrastructure.Auth;
+using GameNewsBoard.Infrastructure.External.Igdb;
 using GameNewsBoard.Infrastructure.Repositories;
+using GameNewsBoard.Infrastructure.Services;
 using GameNewsBoard.Infrastructure.Services.Auth;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace GameNewsBoard.Infrastructure.Services
+namespace GameNewsBoard.Infrastructure.Configurations
 {
     public static class ServiceRegistration
     {
@@ -38,6 +40,9 @@ namespace GameNewsBoard.Infrastructure.Services
 
             services.AddScoped<IUploadedImageService, UploadedImageService>();
             services.AddScoped<IUploadedImageRepository, UploadedImageRepository>();
+
+            services.AddScoped<IIgdbApiService, IgdbApiService>();
+            services.AddScoped<IIgdbQueryBuilder, IgdbQueryBuilder>();
         }
     }
 }
