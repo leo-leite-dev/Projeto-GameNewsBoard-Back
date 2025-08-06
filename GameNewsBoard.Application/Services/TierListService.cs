@@ -1,9 +1,9 @@
 using AutoMapper;
 using GameNewsBoard.Application.Commons;
 using GameNewsBoard.Application.DTOs.Requests;
+using GameNewsBoard.Application.DTOs.Responses.TierList;
 using GameNewsBoard.Application.IRepository;
 using GameNewsBoard.Application.IServices;
-using GameNewsBoard.Application.Responses.DTOs.Responses;
 using GameNewsBoard.Domain.Commons;
 using GameNewsBoard.Domain.Entities;
 using GameNewsBoard.Domain.IStorage;
@@ -82,19 +82,19 @@ namespace GameNewsBoard.Infrastructure.Services
                     var image = await _uploadedImageRepository.GetByIdAsync(imageId.Value);
                     if (image != null)
                     {
-                        _uploadedImageRepository.Remove(image);
+                        await _uploadedImageRepository.DeleteAsync(image);
                         await _imageStorageService.DeleteImageAsync(image.Url);
                     }
                 }
 
-                _tierListRepository.Remove(tierList);
+                await _tierListRepository.DeleteAsync(tierList);
                 await _tierListRepository.SaveChangesAsync();
             }, "Ocorreu um erro ao excluir a tier list. Tente novamente.");
         }
 
         public async Task<Result<IEnumerable<TierListResponse>>> GetTierListsByUserAsync(Guid userId)
         {
-            var tiers = await _tierListRepository.GetByUserAsync(userId);
+            var tiers = await _tierListRepository.GetByUserIdAsync(userId);
             var response = _mapper.Map<IEnumerable<TierListResponse>>(tiers);
             return Result<IEnumerable<TierListResponse>>.Success(response);
         }
@@ -122,6 +122,7 @@ namespace GameNewsBoard.Infrastructure.Services
                 }
 
                 await _tierListRepository.SaveChangesAsync();
+
             }, "Erro ao definir o tier do jogo. Tente novamente.");
         }
 

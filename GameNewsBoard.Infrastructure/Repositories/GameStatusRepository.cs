@@ -5,43 +5,23 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GameNewsBoard.Infrastructure.Repositories
 {
-    public class GameStatusRepository : IGameStatusRepository
+    public class GameStatusRepository : GenericRepository<GameStatus>, IGameStatusRepository
     {
-        private readonly AppDbContext _context;
+        public GameStatusRepository(AppDbContext context) : base(context) { }
 
-        public GameStatusRepository(AppDbContext context)
+        public async Task<List<GameStatus>> GetByUserIdAsync(Guid userId)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
-        }
-
-        public async Task AddAsync(GameStatus gameStatus)
-        {
-            await _context.Set<GameStatus>().AddAsync(gameStatus);
-        }
-
-        public async Task<GameStatus?> GetByUserAndGameAsync(Guid userId, int gameId)
-        {
-            return await _context.Set<GameStatus>()
-                .Include(sg => sg.Game)
-                .FirstOrDefaultAsync(sg => sg.UserId == userId && sg.GameId == gameId);
-        }
-
-        public async Task<IEnumerable<GameStatus>> GetByUserAsync(Guid userId)
-        {
-            return await _context.Set<GameStatus>()
-                .Include(sg => sg.Game)
-                .Where(sg => sg.UserId == userId)
+            return await _dbSet
+                .Include(gs => gs.Game)
+                .Where(gs => gs.UserId == userId)
                 .ToListAsync();
         }
 
-        public void Remove(GameStatus gameStatus)
+        public async Task<GameStatus?> GetByUserAndGameIdAsync(Guid userId, int gameId)
         {
-            _context.Set<GameStatus>().Remove(gameStatus);
-        }
-
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();
+            return await _dbSet
+                .Include(gs => gs.Game)
+                .FirstOrDefaultAsync(gs => gs.UserId == userId && gs.GameId == gameId);
         }
     }
 }

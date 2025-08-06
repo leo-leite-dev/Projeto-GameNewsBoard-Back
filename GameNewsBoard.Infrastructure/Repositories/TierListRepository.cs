@@ -5,58 +5,42 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GameNewsBoard.Infrastructure.Repositories
 {
-    public class TierListRepository : ITierListRepository
+    public class TierListRepository : GenericRepository<TierList>, ITierListRepository
     {
-        private readonly AppDbContext _context;
+        public TierListRepository(AppDbContext context) : base(context) { }
 
-        public TierListRepository(AppDbContext context)
-        {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
-        }
-
-        public async Task AddAsync(TierList tierList)
-        {
-            await _context.TierLists.AddAsync(tierList);
-        }
 
         public async Task AddEntryAsync(TierListEntry entry)
         {
             await _context.Set<TierListEntry>().AddAsync(entry);
         }
 
-        public async Task<TierList?> GetByIdAsync(Guid id)
+        public async Task<List<TierList>> GetByUserIdAsync(Guid userId)
         {
-            return await _context.TierLists
+            return await _dbSet
                 .Include(t => t.Entries)
-                    .ThenInclude(e => e.Game)
-                .FirstOrDefaultAsync(t => t.Id == id);
-        }
-
-        public async Task<(TierList Tier, Guid? ImageId)?> GetTierWithImageIdAsync(Guid tierListId)
-        {
-            return await _context.TierLists
-                .Where(t => t.Id == tierListId)
-                .Select(t => new ValueTuple<TierList, Guid?>(t, t.ImageId))
-                .FirstOrDefaultAsync();
-        }
-
-        public async Task<IEnumerable<TierList>> GetByUserAsync(Guid userId)
-        {
-            return await _context.TierLists
-                .Include(t => t.Entries)
-                    .ThenInclude(e => e.Game)
+                .ThenInclude(e => e.Game)
                 .Where(t => t.UserId == userId)
                 .ToListAsync();
         }
 
-        public void Remove(TierList tierList)
+        public async Task<TierList?> GetDetailedByIdAsync(Guid id)
         {
-            _context.TierLists.Remove(tierList);
+            return await _dbSet
+                .Include(t => t.Entries)
+                .ThenInclude(e => e.Game)
+                .FirstOrDefaultAsync(t => t.Id == id);
         }
 
-        public async Task SaveChangesAsync()
+        public async Task<(TierList tierList, Guid? imageId)?> GetTierWithImageIdAsync(Guid tierListId)
         {
-            await _context.SaveChangesAsync();
+            var tierList = await _dbSet
+                .FirstOrDefaultAsync(t => t.Id == tierListId);
+
+            if (tierList == null)
+                return null;
+
+            return (tierList, tierList.ImageId);
         }
     }
 }

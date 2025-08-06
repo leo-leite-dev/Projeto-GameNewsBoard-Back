@@ -1,1 +1,0 @@
-public record UploadedImageDto(Guid Id, string Url, bool IsUsed);

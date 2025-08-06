@@ -1,5 +1,5 @@
 using System.Text;
-using GameNewsBoard.Application.IServices;
+using GameNewsBoard.Application.IServices.Igdb;
 
 namespace GameNewsBoard.Infrastructure.External.Igdb
 {

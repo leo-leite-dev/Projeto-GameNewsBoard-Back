@@ -1,5 +1,5 @@
 using GameNewsBoard.Application.DTOs.Requests;
-using GameNewsBoard.Application.Responses.DTOs.Responses;
+using GameNewsBoard.Application.DTOs.Responses.TierList;
 using GameNewsBoard.Domain.Commons;
 
 namespace GameNewsBoard.Application.IServices

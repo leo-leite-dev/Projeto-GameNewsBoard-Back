@@ -1,87 +1,89 @@
-using GameNewsBoard.Application.IServices;
-using GameNewsBoard.Domain.Enums;
 using GameNewsBoard.Api.Helpers;
 using GameNewsBoard.Infrastructure.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using GameNewsBoard.Application.IServices.IGame;
+using GameNewsBoard.Application.DTOs.Requests;
 
-namespace GameNewsBoard.Api.Controllers;
-
-[ApiController]
-[Route("api/[controller]")]
-public class GameStatusController : ControllerBase
+namespace GameNewsBoard.Api.Controllers
 {
-    private readonly IGameStatusService _gameStatusService;
-    private readonly ILogger<GameStatusController> _logger;
 
-    public GameStatusController(
-        IGameStatusService gameStatusService,
-        ILogger<GameStatusController> logger)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class GameStatusController : ControllerBase
     {
-        _gameStatusService = gameStatusService ?? throw new ArgumentNullException(nameof(gameStatusService));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
+        private readonly IGameStatusService _gameStatusService;
+        private readonly ILogger<GameStatusController> _logger;
 
-    [HttpPut("{gameId}/status")]
-    [Authorize]
-    public async Task<IActionResult> SetGameStatus(int gameId, [FromQuery] Status status)
-    {
-        try
+        public GameStatusController(
+            IGameStatusService gameStatusService,
+            ILogger<GameStatusController> logger)
         {
-            var userId = User.GetUserId();
-            var result = await _gameStatusService.SetGameStatusAsync(userId, gameId, status);
-
-            if (!result.IsSuccess)
-                return ApiResponseHelper.CreateError("Erro ao definir status", result.Error);
-
-            return Ok(ApiResponseHelper.CreateSuccess("Status definido com sucesso"));
+            _gameStatusService = gameStatusService ?? throw new ArgumentNullException(nameof(gameStatusService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
-        catch (Exception ex)
+
+        [HttpPut("{gameId}/status")]
+        [Authorize]
+        public async Task<IActionResult> SetGameStatus(int gameId, [FromBody] GameStatusRequest request)
         {
-            _logger.LogError(ex, "Erro ao definir status para o jogo.");
-            return ApiResponseHelper.CreateError("Erro ao definir status", ex.Message);
+            try
+            {
+                var userId = User.GetUserId();
+                var result = await _gameStatusService.SetGameStatusAsync(userId, gameId, request);
+
+                if (!result.IsSuccess)
+                    return ApiResponseHelper.CreateError("Erro ao definir status", result.Error);
+
+                return Ok(ApiResponseHelper.CreateSuccess("Status definido com sucesso"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao definir status para o jogo.");
+                return ApiResponseHelper.CreateError("Erro ao definir status", ex.Message);
+            }
         }
-    }
 
-    [HttpDelete("{gameId}/status")]
-    [Authorize]
-    public async Task<IActionResult> RemoveGameStatus(int gameId)
-    {
-        try
+        [HttpDelete("{gameId}/status")]
+        [Authorize]
+        public async Task<IActionResult> RemoveGameStatus(int gameId)
         {
-            var userId = User.GetUserId();
-            var result = await _gameStatusService.RemoveGameStatusAsync(userId, gameId);
+            try
+            {
+                var userId = User.GetUserId();
+                var result = await _gameStatusService.RemoveGameStatusAsync(userId, gameId);
 
-            if (!result.IsSuccess)
-                return ApiResponseHelper.CreateError("Erro ao remover status", result.Error);
+                if (!result.IsSuccess)
+                    return ApiResponseHelper.CreateError("Erro ao remover status", result.Error);
 
-            return Ok(ApiResponseHelper.CreateSuccess("Status removido com sucesso"));
+                return Ok(ApiResponseHelper.CreateSuccess("Status removido com sucesso"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao remover status do jogo.");
+                return ApiResponseHelper.CreateError("Erro ao remover status", ex.Message);
+            }
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Erro ao remover status do jogo.");
-            return ApiResponseHelper.CreateError("Erro ao remover status", ex.Message);
-        }
-    }
 
-    [HttpGet("me")]
-    [Authorize]
-    public async Task<IActionResult> GetMyGameStatuses()
-    {
-        try
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<IActionResult> GetMyGameStatuses()
         {
-            var userId = User.GetUserId();
-            var result = await _gameStatusService.GetUserGameStatusesAsync(userId);
+            try
+            {
+                var userId = User.GetUserId();
+                var result = await _gameStatusService.GetUserGameStatusesAsync(userId);
 
-            if (!result.IsSuccess)
-                return ApiResponseHelper.CreateError("Erro ao buscar status", result.Error);
+                if (!result.IsSuccess)
+                    return ApiResponseHelper.CreateError("Erro ao buscar status", result.Error);
 
-            return Ok(ApiResponseHelper.CreateSuccess(result.Value, "Status carregados com sucesso"));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Erro ao buscar status dos jogos do usuário.");
-            return ApiResponseHelper.CreateError("Erro ao buscar status", ex.Message);
+                return Ok(ApiResponseHelper.CreateSuccess(result.Value, "Status carregados com sucesso"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao buscar status dos jogos do usuário.");
+                return ApiResponseHelper.CreateError("Erro ao buscar status", ex.Message);
+            }
         }
     }
 }

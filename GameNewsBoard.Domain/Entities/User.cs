@@ -8,6 +8,11 @@ namespace GameNewsBoard.Domain.Entities
 
         public string PasswordHash { get; private set; } = string.Empty;
 
+        public string? SteamId { get; set; }
+
+        public ICollection<TierList> TierLists { get; private set; } = new List<TierList>();
+        public ICollection<GameStatus> GameStatuses { get; private set; } = new List<GameStatus>();
+
         private User() { }
 
         public User(string username, string passwordHash)

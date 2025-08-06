@@ -1,50 +1,19 @@
+using GameNewsBoard.Application.IRepository;
 using GameNewsBoard.Domain.Entities;
 using GameNewsBoard.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace GameNewsBoard.Infrastructure.Repositories
 {
-    public class UploadedImageRepository : IUploadedImageRepository
+    public class UploadedImageRepository : GenericRepository<UploadedImage>, IUploadedImageRepository
     {
-        private readonly AppDbContext _context;
+        public UploadedImageRepository(AppDbContext context) : base(context) { }
 
-        public UploadedImageRepository(AppDbContext context)
+        public async Task<List<UploadedImage>> GetUnusedImagesByUserIdAsync(Guid userId)
         {
-            _context = context;
-        }
-
-        public Task AddAsync(UploadedImage image)
-        {
-            _context.UploadedImages.Add(image);
-            return Task.CompletedTask;
-        }
-
-        public Task<UploadedImage?> GetByIdAsync(Guid id)
-        {
-            return _context.UploadedImages.FirstOrDefaultAsync(x => x.Id == id);
-        }
-
-        public Task<IEnumerable<UploadedImage>> GetUnusedByUserAsync(Guid userId)
-        {
-            return Task.FromResult(_context.UploadedImages
-                .Where(x => x.UserId == userId && !x.IsUsed)
-                .AsEnumerable());
-        }
-
-        public Task SaveChangesAsync()
-        {
-            return _context.SaveChangesAsync();
-        }
-
-        public Task DeleteAsync(UploadedImage image)
-        {
-            _context.UploadedImages.Remove(image);
-            return Task.CompletedTask;
-        }
-
-        public void Remove(UploadedImage image)
-        {
-            _context.UploadedImages.Remove(image);
+            return await _dbSet
+                .Where(img => img.UserId == userId && !img.IsUsed)
+                .ToListAsync();
         }
     }
 }

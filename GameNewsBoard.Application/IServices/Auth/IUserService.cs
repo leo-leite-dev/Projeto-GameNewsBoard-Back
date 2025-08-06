@@ -1,8 +1,12 @@
+using GameNewsBoard.Application.DTOs.Requests;
 using GameNewsBoard.Domain.Commons;
 using GameNewsBoard.Domain.Entities;
 
-public interface IAuthService
+namespace GameNewsBoard.Application.IServices.Auth
 {
-    Task<Result<User>> AuthenticateAsync(LoginRequest request);
-    Task<Result> RegisterAsync(RegisterRequest request);
+    public interface IAuthService
+    {
+        Task<Result<User>> AuthenticateAsync(LoginRequest request);
+        Task<Result> RegisterAsync(RegisterRequest request);
+    }
 }

@@ -2,7 +2,9 @@ using System.Globalization;
 using AutoMapper;
 using GameNewsBoard.Application.DTOs;
 using GameNewsBoard.Application.DTOs.Responses;
-using GameNewsBoard.Application.Responses.DTOs.Responses;
+using GameNewsBoard.Application.DTOs.Responses.Game;
+using GameNewsBoard.Application.DTOs.Responses.TierList;
+using GameNewsBoard.Application.DTOs.Responses.User;
 using GameNewsBoard.Domain.Entities;
 
 namespace GameNewsBoard.Application.Mapping
@@ -36,17 +38,19 @@ namespace GameNewsBoard.Application.Mapping
                         ? DateTimeOffset.FromUnixTimeSeconds(src.ReleaseDateUnix.Value).ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)
                         : string.Empty));
 
-            CreateMap<RawGameDto, GameReleaseResponse>()
-                .ForMember(dest => dest.Platform, opt => opt.MapFrom(src =>
-                    src.Platforms != null && src.Platforms.Any()
-                        ? string.Join(", ", src.Platforms)
-                        : "Unknown"))
+            CreateMap<RawGameReleaseDto, GameReleaseResponse>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))
+                .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category))
                 .ForMember(dest => dest.CoverImage, opt => opt.MapFrom(src => src.CoverImageUrl))
                 .ForMember(dest => dest.ReleaseDate, opt => opt.MapFrom(src =>
                     src.ReleaseDateUnix.HasValue
-                        ? DateTimeOffset.FromUnixTimeSeconds(src.ReleaseDateUnix.Value).ToString("yyyy-MM-dd")
-                        : string.Empty))
-                .ForMember(dest => dest.Category, opt => opt.Ignore());
+                        ? DateTimeOffset.FromUnixTimeSeconds(src.ReleaseDateUnix.Value).UtcDateTime.ToString("yyyy-MM-dd")
+                        : "Unknown"))
+                .ForMember(dest => dest.Platform, opt => opt.MapFrom(src =>
+                    src.Platforms != null && src.Platforms.Any()
+                        ? string.Join(", ", src.Platforms)
+                        : "Unknown"));
 
             CreateMap<GameResponse, Game>()
                 .ForMember(dest => dest.Released, opt => opt.MapFrom(src => ParseDate(src.ReleaseDate)))
@@ -62,12 +66,20 @@ namespace GameNewsBoard.Application.Mapping
             CreateMap<TierListEntry, TierListEntryResponse>();
 
             CreateMap<User, UserProfileResponse>()
-                .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.Id));
+                .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Username));
 
-            CreateMap<GameStatus, GameStatusResponse>()
-                .ForMember(dest => dest.GameId, opt => opt.MapFrom(src => src.GameId))
-                .ForMember(dest => dest.Game, opt => opt.MapFrom(src => src.Game))
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
+            CreateMap<GameStatus, GameStatusResponse>();
+
+            CreateMap<UserProfileDto, UserProfileResponse>()
+                .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.User.Id))
+                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.User.Username))
+                .ForMember(dest => dest.Tiers, opt => opt.MapFrom(src => src.Tiers))
+                .ForMember(dest => dest.GameStatuses, opt => opt.MapFrom(src => src.GameStatuses));
+
+            CreateMap<UploadedImage, UploadedImageResponse>()
+                .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.Url))
+                .ForMember(dest => dest.ImageId, opt => opt.MapFrom(src => src.Id.ToString()));
         }
 
         private static DateTimeOffset ParseDate(string released)

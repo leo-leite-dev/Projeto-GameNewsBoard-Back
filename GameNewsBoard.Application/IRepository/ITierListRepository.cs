@@ -1,16 +1,12 @@
-
 using GameNewsBoard.Domain.Entities;
 
-namespace GameNewsBoard.Application.IRepository;
-
-public interface ITierListRepository
+namespace GameNewsBoard.Application.IRepository
 {
-    Task AddAsync(TierList tierList);
-    Task AddEntryAsync(TierListEntry entry);
-    Task<TierList?> GetByIdAsync(Guid id);
-    Task<(TierList Tier, Guid? ImageId)?> GetTierWithImageIdAsync(Guid tierListId);
-    Task<IEnumerable<TierList>> GetByUserAsync(Guid userId);
-    void Remove(TierList tierList);
-    Task SaveChangesAsync();
-
+    public interface ITierListRepository : IGenericRepository<TierList>
+    {
+        Task AddEntryAsync(TierListEntry entry);
+        Task<List<TierList>> GetByUserIdAsync(Guid userId);
+        Task<TierList?> GetDetailedByIdAsync(Guid id);
+        Task<(TierList tierList, Guid? imageId)?> GetTierWithImageIdAsync(Guid tierListId);
+    }
 }

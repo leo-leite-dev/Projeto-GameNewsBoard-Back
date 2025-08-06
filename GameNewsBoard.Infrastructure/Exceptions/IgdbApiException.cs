@@ -1,4 +1,4 @@
-namespace GameNewsBoard.Application.Exceptions.Api
+namespace GameNewsBoard.Application.Exceptions
 {
     public class IgdbApiException : Exception
     {

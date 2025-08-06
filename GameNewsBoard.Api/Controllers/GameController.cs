@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using GameNewsBoard.Application.IServices;
 using GameNewsBoard.Application.DTOs.Shared;
 using GameNewsBoard.Application.DTOs;
 using GameNewsBoard.Api.Helpers;
 using GameNewsBoard.Domain.Enums;
-using GameNewsBoard.Application.DTOs.Responses;
+using GameNewsBoard.Application.DTOs.Responses.Game;
+using GameNewsBoard.Application.IServices.IGame;
 
 namespace GameNewsBoard.Api.Controllers;
 

@@ -1,3 +1,6 @@
+using AutoMapper;
+using GameNewsBoard.Application.DTOs.Responses;
+using GameNewsBoard.Application.IRepository;
 using GameNewsBoard.Application.IServices;
 using GameNewsBoard.Domain.Commons;
 using GameNewsBoard.Domain.Entities;
@@ -10,16 +13,19 @@ public class UploadedImageService : IUploadedImageService
 {
     private readonly IUploadedImageRepository _uploadedImageRepository;
     private readonly IImageStorageService _imageStorageService;
+    private readonly IMapper _mapper;
 
     public UploadedImageService(
         IUploadedImageRepository uploadedImageRepository,
-        IImageStorageService imageStorageService)
+        IImageStorageService imageStorageService,
+        IMapper mapper)
     {
         _uploadedImageRepository = uploadedImageRepository ?? throw new ArgumentNullException(nameof(uploadedImageRepository));
         _imageStorageService = imageStorageService ?? throw new ArgumentNullException(nameof(imageStorageService));
+        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
     }
 
-    public async Task<Result<UploadedImageDto>> RegisterImageAsync(Guid userId, Stream fileStream, string originalFileName, string contentType, ImageBucketCategory category)
+    public async Task<Result<UploadedImageResponse>> RegisterImageAsync(Guid userId, Stream fileStream, string originalFileName, string contentType, ImageBucketCategory category)
     {
         var fileExtension = Path.GetExtension(originalFileName);
         var fileName = $"{Guid.NewGuid()}{fileExtension}";
@@ -35,7 +41,8 @@ public class UploadedImageService : IUploadedImageService
         await _uploadedImageRepository.AddAsync(image);
         await _uploadedImageRepository.SaveChangesAsync();
 
-        return Result<UploadedImageDto>.Success(new UploadedImageDto(image.Id, image.Url, image.IsUsed));
+        var response = _mapper.Map<UploadedImageResponse>(image);
+        return Result<UploadedImageResponse>.Success(response);
     }
 
     public async Task MarkImageAsUsedAsync(Guid imageId)

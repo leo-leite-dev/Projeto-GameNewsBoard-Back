@@ -1,82 +1,83 @@
 using Microsoft.AspNetCore.Mvc;
-using GameNewsBoard.Application.IServices;
 using GameNewsBoard.Api.Helpers;
 using GameNewsBoard.Domain.Enums;
+using GameNewsBoard.Application.IServices.IGame;
 
-namespace GameNewsBoard.Api.Controllers;
-
-[ApiController]
-[Route("api/[controller]")]
-public class GameReleaseController : ControllerBase
+namespace GameNewsBoard.Api.Controllers
 {
-    private readonly IGameReleaseService _gameReleaseService;
-    private readonly ILogger<GameReleaseController> _logger;
-
-    public GameReleaseController(IGameReleaseService gameReleaseService, ILogger<GameReleaseController> logger)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class GameReleaseController : ControllerBase
     {
-        _gameReleaseService = gameReleaseService;
-        _logger = logger;
-    }
+        private readonly IIgdbGameReleaseService _gameReleaseService;
+        private readonly ILogger<GameReleaseController> _logger;
 
-    [HttpGet("today")]
-    public async Task<IActionResult> GetTodayReleases(
-    [FromQuery] PlatformFamily? platform = null)
-    {
-        try
+        public GameReleaseController(IIgdbGameReleaseService gameReleaseService, ILogger<GameReleaseController> logger)
         {
-            var releases = await _gameReleaseService.GetTodayReleasesGamesAsync(platform);
-
-            if (releases == null || releases.Count == 0)
-                return Ok(ApiResponseHelper.CreateEmptySuccess("Nenhum jogo será lançado hoje."));
-
-            return Ok(ApiResponseHelper.CreateSuccess(releases, "Jogos lançados hoje carregados com sucesso."));
+            _gameReleaseService = gameReleaseService;
+            _logger = logger;
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Erro ao buscar lançamentos do dia.");
-            return ApiResponseHelper.CreateError("Erro ao buscar lançamentos do dia", ex.Message);
-        }
-    }
 
-    [HttpGet("upcoming")]
-    public async Task<IActionResult> GetUpcomingReleases(
-        [FromQuery] int daysAhead = 7,
+        [HttpGet("today")]
+        public async Task<IActionResult> GetTodayReleases(
         [FromQuery] PlatformFamily? platform = null)
-    {
-        try
         {
-            var releases = await _gameReleaseService.GetUpcomingGamesAsync(daysAhead, platform);
+            try
+            {
+                var releases = await _gameReleaseService.GetTodayReleasesGamesAsync(platform);
 
-            if (releases == null || releases.Count == 0)
-                return Ok(ApiResponseHelper.CreateEmptySuccess($"Nenhum jogo será lançado nos próximos {daysAhead} dias."));
+                if (releases == null || releases.Count == 0)
+                    return Ok(ApiResponseHelper.CreateEmptySuccess("Nenhum jogo será lançado hoje."));
 
-            return Ok(ApiResponseHelper.CreateSuccess(releases, $"Jogos que serão lançados nos próximos {daysAhead} dias carregados com sucesso."));
+                return Ok(ApiResponseHelper.CreateSuccess(releases, "Jogos lançados hoje carregados com sucesso."));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao buscar lançamentos do dia.");
+                return ApiResponseHelper.CreateError("Erro ao buscar lançamentos do dia", ex.Message);
+            }
         }
-        catch (Exception ex)
+
+        [HttpGet("upcoming")]
+        public async Task<IActionResult> GetUpcomingReleases(
+            [FromQuery] int daysAhead = 7,
+            [FromQuery] PlatformFamily? platform = null)
         {
-            _logger.LogError(ex, "Erro ao buscar lançamentos futuros.");
-            return ApiResponseHelper.CreateError("Erro ao buscar lançamentos futuros", ex.Message);
+            try
+            {
+                var releases = await _gameReleaseService.GetUpcomingGamesAsync(daysAhead, platform);
+
+                if (releases == null || releases.Count == 0)
+                    return Ok(ApiResponseHelper.CreateEmptySuccess($"Nenhum jogo será lançado nos próximos {daysAhead} dias."));
+
+                return Ok(ApiResponseHelper.CreateSuccess(releases, $"Jogos que serão lançados nos próximos {daysAhead} dias carregados com sucesso."));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao buscar lançamentos futuros.");
+                return ApiResponseHelper.CreateError("Erro ao buscar lançamentos futuros", ex.Message);
+            }
         }
-    }
 
-    [HttpGet("recent")]
-    public async Task<IActionResult> GetRecentReleases(
-      [FromQuery] int daysBack = 7,
-      [FromQuery] PlatformFamily? platform = null)
-    {
-        try
+        [HttpGet("recent")]
+        public async Task<IActionResult> GetRecentReleases(
+          [FromQuery] int daysBack = 7,
+          [FromQuery] PlatformFamily? platform = null)
         {
-            var releases = await _gameReleaseService.GetRecentlyReleasedGamesAsync(daysBack, platform);
+            try
+            {
+                var releases = await _gameReleaseService.GetRecentlyReleasedGamesAsync(daysBack, platform);
 
-            if (releases == null || releases.Count == 0)
-                return Ok(ApiResponseHelper.CreateEmptySuccess($"Nenhum jogo foi lançado nos últimos {daysBack} dias."));
+                if (releases == null || releases.Count == 0)
+                    return Ok(ApiResponseHelper.CreateEmptySuccess($"Nenhum jogo foi lançado nos últimos {daysBack} dias."));
 
-            return Ok(ApiResponseHelper.CreateSuccess(releases, $"Jogos lançados nos últimos {daysBack} dias carregados com sucesso."));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Erro ao buscar lançamentos recentes.");
-            return ApiResponseHelper.CreateError("Erro ao buscar lançamentos recentes", ex.Message);
+                return Ok(ApiResponseHelper.CreateSuccess(releases, $"Jogos lançados nos últimos {daysBack} dias carregados com sucesso."));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao buscar lançamentos recentes.");
+                return ApiResponseHelper.CreateError("Erro ao buscar lançamentos recentes", ex.Message);
+            }
         }
     }
 }

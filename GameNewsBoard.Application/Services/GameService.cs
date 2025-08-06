@@ -1,11 +1,12 @@
 using AutoMapper;
 using GameNewsBoard.Application.DTOs;
-using GameNewsBoard.Application.DTOs.Responses;
+using GameNewsBoard.Application.DTOs.Responses.Game;
 using GameNewsBoard.Application.DTOs.Shared;
 using GameNewsBoard.Application.Exceptions;
 using GameNewsBoard.Application.Exceptions.Domain;
 using GameNewsBoard.Application.IRepository;
-using GameNewsBoard.Application.IServices;
+using GameNewsBoard.Application.IServices.IGame;
+using GameNewsBoard.Application.IServices.Igdb;
 using GameNewsBoard.Application.Validators;
 using GameNewsBoard.Domain.Entities;
 using GameNewsBoard.Domain.Enums;
@@ -15,7 +16,6 @@ namespace GameNewsBoard.Application.Services
 
     public class GameService : IGameService
     {
-        private readonly IIgdbApiService _igdbApi;
         private readonly IIgdbQueryBuilder _igdbQueryBuilder;
         private readonly IIgdbApiService _igdbApiService;
         private readonly IGameRepository _gameRepository;
@@ -23,14 +23,12 @@ namespace GameNewsBoard.Application.Services
 
 
         public GameService(
-            IIgdbApiService igdbApi,
             IIgdbQueryBuilder igdbQueryBuilder,
             IIgdbApiService igdbApiService,
             IGameRepository gameRepository,
             IMapper mapper
             )
         {
-            _igdbApi = igdbApi ?? throw new ArgumentNullException(nameof(igdbApi));
             _igdbQueryBuilder = igdbQueryBuilder ?? throw new ArgumentNullException(nameof(igdbQueryBuilder));
             _igdbApiService = igdbApiService ?? throw new ArgumentNullException(nameof(igdbApiService));
             _gameRepository = gameRepository ?? throw new ArgumentNullException(nameof(gameRepository));

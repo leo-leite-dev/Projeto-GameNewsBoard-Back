@@ -1,14 +1,10 @@
 using System.Text.Json.Serialization;
-using GameNewsBoard.Infrastructure.ExternalDtos.Commons;
+using GameNewsBoard.Infrastructure.Igdb.ExternalDtos.Base;
 
 namespace GameNewsBoard.Infrastructure.Igdb.ExternalDtos
 {
-    public class IgdbGameDto
+    public class IgdbGameDto : IgdbGameBaseDto
     {
-        [JsonPropertyName("id")]
-        public long Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-
         [JsonPropertyName("aggregated_rating")]
         public float? AggregatedRating { get; set; }
 
@@ -17,11 +13,5 @@ namespace GameNewsBoard.Infrastructure.Igdb.ExternalDtos
 
         [JsonPropertyName("first_release_date")]
         public long? FirstReleaseDateUnix { get; set; }
-
-        [JsonPropertyName("cover")]
-        public IgdbCoverDto? Cover { get; set; }
-
-        [JsonPropertyName("platforms")]
-        public List<IgdbPlatformDto> Platforms { get; set; } = new();
     }
 }

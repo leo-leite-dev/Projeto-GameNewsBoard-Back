@@ -6,7 +6,7 @@ using GameNewsBoard.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
-namespace GameNewsBoard.Infrastructure.Services.Auth
+namespace GameNewsBoard.Application.Services.Auth
 {
     public class TokenService : ITokenService
     {

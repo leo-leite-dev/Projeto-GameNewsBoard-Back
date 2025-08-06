@@ -177,12 +177,20 @@ namespace GameNewsBoard.Infrastructure.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
+                    b.Property<string>("SteamId")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("SteamId")
+                        .IsUnique()
+                        .HasFilter("\"SteamId\" IS NOT NULL");
 
                     b.HasIndex("Username")
                         .IsUnique();
@@ -199,7 +207,7 @@ namespace GameNewsBoard.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("GameNewsBoard.Domain.Entities.User", "User")
-                        .WithMany()
+                        .WithMany("GameStatuses")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -217,7 +225,7 @@ namespace GameNewsBoard.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("GameNewsBoard.Domain.Entities.User", "User")
-                        .WithMany()
+                        .WithMany("TierLists")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -249,6 +257,13 @@ namespace GameNewsBoard.Infrastructure.Migrations
             modelBuilder.Entity("GameNewsBoard.Domain.Entities.TierList", b =>
                 {
                     b.Navigation("Entries");
+                });
+
+            modelBuilder.Entity("GameNewsBoard.Domain.Entities.User", b =>
+                {
+                    b.Navigation("GameStatuses");
+
+                    b.Navigation("TierLists");
                 });
 #pragma warning restore 612, 618
         }

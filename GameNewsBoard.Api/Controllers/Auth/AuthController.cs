@@ -1,89 +1,90 @@
 using GameNewsBoard.Application.IServices.Auth;
 using GameNewsBoard.Api.Helpers;
 using Microsoft.AspNetCore.Mvc;
-using GameNewsBoard.Application.IServices;
+using GameNewsBoard.Application.DTOs.Requests;
 
-namespace GameNewsBoard.Api.Controllers;
-
-[ApiController]
-[Route("api/[controller]")]
-public class AuthController : ControllerBase
+namespace GameNewsBoard.Api.Controllers
 {
-    private readonly ITokenService _tokenService;
-    private readonly ICookieService _cookieService;
-    private readonly IAuthService _authService;
-    private readonly ILogger<AuthController> _logger;
-
-    public AuthController(
-        ITokenService tokenService,
-        ICookieService cookieService,
-        IAuthService authService,
-        ILogger<AuthController> logger)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class AuthController : ControllerBase
     {
-        _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
-        _cookieService = cookieService ?? throw new ArgumentNullException(nameof(cookieService));
-        _authService = authService ?? throw new ArgumentNullException(nameof(authService));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
+        private readonly ITokenService _tokenService;
+        private readonly ICookieService _cookieService;
+        private readonly IAuthService _authService;
+        private readonly ILogger<AuthController> _logger;
 
-    [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
-    {
-        if (!ModelState.IsValid)
-            return ApiResponseHelper.CreateError("Erro de validação", "Dados inválidos para criação do usuário.", 400);
-
-        try
+        public AuthController(
+            ITokenService tokenService,
+            ICookieService cookieService,
+            IAuthService authService,
+            ILogger<AuthController> logger)
         {
-            var result = await _authService.RegisterAsync(request);
-            if (!result.IsSuccess)
-                return ApiResponseHelper.CreateError("Falha no registro", result.Error, 400);
-
-            return Ok(ApiResponseHelper.CreateSuccess("Usuário registrado com sucesso"));
+            _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
+            _cookieService = cookieService ?? throw new ArgumentNullException(nameof(cookieService));
+            _authService = authService ?? throw new ArgumentNullException(nameof(authService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
-        catch (Exception ex)
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
-            _logger.LogError(ex, "Erro interno ao registrar usuário.");
-            return ApiResponseHelper.CreateError("Erro no servidor", "Ocorreu um erro ao registrar o usuário. Tente novamente mais tarde.", 500);
+            if (!ModelState.IsValid)
+                return ApiResponseHelper.CreateError("Erro de validação", "Dados inválidos para criação do usuário.", 400);
+
+            try
+            {
+                var result = await _authService.RegisterAsync(request);
+                if (!result.IsSuccess)
+                    return ApiResponseHelper.CreateError("Falha no registro", result.Error, 400);
+
+                return Ok(ApiResponseHelper.CreateSuccess("Usuário registrado com sucesso"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro interno ao registrar usuário.");
+                return ApiResponseHelper.CreateError("Erro no servidor", "Ocorreu um erro ao registrar o usuário. Tente novamente mais tarde.", 500);
+            }
         }
-    }
 
-    [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request)
-    {
-        if (!ModelState.IsValid)
-            return ApiResponseHelper.CreateError("Erro de validação", "Dados de login inválidos.", 400);
-
-        try
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var result = await _authService.AuthenticateAsync(request);
+            if (!ModelState.IsValid)
+                return ApiResponseHelper.CreateError("Erro de validação", "Dados de login inválidos.", 400);
 
-            if (!result.IsSuccess || result.Value is null)
-                return ApiResponseHelper.CreateError("Falha na autenticação", result.Error ?? "Usuário ou senha incorretos.", 401);
+            try
+            {
+                var result = await _authService.AuthenticateAsync(request);
 
-            var token = _tokenService.GenerateToken(result.Value);
-            _cookieService.SetJwtCookie(Response, token, TimeSpan.FromHours(1));
+                if (!result.IsSuccess || result.Value is null)
+                    return ApiResponseHelper.CreateError("Falha na autenticação", result.Error ?? "Usuário ou senha incorretos.", 401);
 
-            return Ok(ApiResponseHelper.CreateSuccess("Login realizado com sucesso"));
+                var token = _tokenService.GenerateToken(result.Value);
+                _cookieService.SetJwtCookie(Response, token, TimeSpan.FromHours(1));
+
+                return Ok(ApiResponseHelper.CreateSuccess("Login realizado com sucesso"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro interno ao fazer login.");
+                return ApiResponseHelper.CreateError("Erro no servidor", "Ocorreu um erro ao processar o login. Tente novamente mais tarde.", 500);
+            }
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Erro interno ao fazer login.");
-            return ApiResponseHelper.CreateError("Erro no servidor", "Ocorreu um erro ao processar o login. Tente novamente mais tarde.", 500);
-        }
-    }
 
-    [HttpPost("logout")]
-    public IActionResult Logout()
-    {
-        try
+        [HttpPost("logout")]
+        public IActionResult Logout()
         {
-            _cookieService.ClearJwtCookie(Response);
-            return Ok(ApiResponseHelper.CreateSuccess("Logout realizado com sucesso"));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Erro interno ao fazer logout.");
-            return ApiResponseHelper.CreateError("Erro no servidor", "Erro ao encerrar a sessão. Tente novamente mais tarde.", 500);
+            try
+            {
+                _cookieService.ClearJwtCookie(Response);
+                return Ok(ApiResponseHelper.CreateSuccess("Logout realizado com sucesso"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro interno ao fazer logout.");
+                return ApiResponseHelper.CreateError("Erro no servidor", "Erro ao encerrar a sessão. Tente novamente mais tarde.", 500);
+            }
         }
     }
 }
