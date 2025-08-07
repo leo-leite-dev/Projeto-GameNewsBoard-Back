@@ -52,15 +52,18 @@ namespace GameNewsBoard.Application.Mapping
             CreateMap<SteamPlayerDto, SteamUserProfileResponse>()
                 .ForMember(dest => dest.Avatar, opt => opt.MapFrom(src => src.Avatarfull));
 
-           // 🔹 Steam → SteamUserProfileResponse
-
             // 🔹 Steam → SteamOwnedGameResponse
-            CreateMap<SteamOwnedGameDto, OwnedGameResponse>()
+            // ExternalMappingProfile.cs
+            CreateMap<SteamOwnedGameDto, RawSteamGameDto>()
                 .ForMember(dest => dest.AppId, opt => opt.MapFrom(src => src.AppId))
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
                 .ForMember(dest => dest.PlaytimeForever, opt => opt.MapFrom(src => src.PlaytimeForever))
-                .ForMember(dest => dest.IconUrl, opt => opt.MapFrom(src =>
-                    $"https://media.steampowered.com/steamcommunity/public/images/apps/{src.AppId}/{src.IconUrl}.jpg"));
+                .ForMember(dest => dest.LogoUrl, opt => opt.MapFrom(src =>
+                    $"https://cdn.cloudflare.steamstatic.com/steam/apps/{src.AppId}/header.jpg"))
+                .ForMember(dest => dest.LastPlayed, opt => opt.MapFrom(src =>
+                    src.LastPlayedUnix.HasValue && src.LastPlayedUnix > 0
+                        ? DateTimeOffset.FromUnixTimeSeconds(src.LastPlayedUnix.Value)
+                        : (DateTimeOffset?)null));
 
             // 🔹 Steam → SteamAchievementResponse
             CreateMap<SteamAchievementDto, SteamAchievementResponse>()
@@ -70,7 +73,6 @@ namespace GameNewsBoard.Application.Mapping
                     src.UnlockTimeUnix > 0
                         ? DateTimeOffset.FromUnixTimeSeconds(src.UnlockTimeUnix)
                         : (DateTimeOffset?)null));
-
         }
     }
 }

@@ -3,6 +3,7 @@ using AutoMapper;
 using GameNewsBoard.Application.DTOs;
 using GameNewsBoard.Application.DTOs.Responses;
 using GameNewsBoard.Application.DTOs.Responses.Game;
+using GameNewsBoard.Application.DTOs.Responses.Steam;
 using GameNewsBoard.Application.DTOs.Responses.TierList;
 using GameNewsBoard.Application.DTOs.Responses.User;
 using GameNewsBoard.Domain.Entities;
@@ -80,6 +81,18 @@ namespace GameNewsBoard.Application.Mapping
             CreateMap<UploadedImage, UploadedImageResponse>()
                 .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.Url))
                 .ForMember(dest => dest.ImageId, opt => opt.MapFrom(src => src.Id.ToString()));
+
+            CreateMap<RawSteamGameDto, OwnedGameResponse>()
+.ForMember(dest => dest.AppId, opt => opt.MapFrom(src => src.AppId))
+.ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
+.ForMember(dest => dest.LogoUrl, opt => opt.MapFrom(src => src.LogoUrl))
+.ForMember(dest => dest.PlaytimeForever, opt => opt.MapFrom(src => src.PlaytimeForever))
+.ForMember(dest => dest.LastPlayed, opt => opt.MapFrom(src => src.LastPlayed))
+
+// Esses campos são preenchidos depois, fora do AutoMapper
+.ForMember(dest => dest.AchievementsUnlocked, opt => opt.Ignore())
+.ForMember(dest => dest.TotalAchievements, opt => opt.Ignore())
+.ForMember(dest => dest.Achievements, opt => opt.Ignore());
         }
 
         private static DateTimeOffset ParseDate(string released)

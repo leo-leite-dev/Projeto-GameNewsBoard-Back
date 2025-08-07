@@ -28,9 +28,9 @@ namespace GameNewsBoard.Infrastructure.ExternalDtos.Steam
         [JsonPropertyName("playtime_forever")]
         public int PlaytimeForever { get; set; }
 
-        [JsonPropertyName("img_icon_url")]
-        public string IconUrl { get; set; } = string.Empty;
-
+        [JsonPropertyName("img_logo_url")]
+        public string ImgLogoUrl { get; set; } = string.Empty;
+        
         [JsonPropertyName("rtime_last_played")]
         public long? LastPlayedUnix { get; set; }
     }

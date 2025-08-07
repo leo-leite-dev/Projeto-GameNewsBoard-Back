@@ -45,6 +45,35 @@ namespace GameNewsBoard.Api.Controllers
             }
         }
 
+        [HttpGet("steam/profile-with-games")]
+        [Authorize]
+        public async Task<IActionResult> GetSteamProfileWithGames()
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrWhiteSpace(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+                    return ApiResponseHelper.CreateError("Usuário não autenticado", "Não foi possível identificar o usuário atual.", 401);
+
+                var profile = await _steamUserService.GetSteamUserProfileWithGamesAsync(userId);
+
+                if (profile == null)
+                    return ApiResponseHelper.CreateError("Perfil não encontrado", "Não foi possível carregar os dados da Steam. Verifique se sua conta está vinculada.");
+
+                return Ok(ApiResponseHelper.CreateSuccess(profile, "Perfil da Steam com jogos e conquistas carregado com sucesso."));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao obter perfil completo da Steam para usuário logado.");
+
+                return ApiResponseHelper.CreateError(
+                    "Erro ao buscar dados da Steam",
+                    "Ocorreu um erro ao tentar carregar o perfil da Steam com jogos e conquistas.",
+                    500
+                );
+            }
+        }
+
         [HttpPost("link")]
         [Authorize]
         public async Task<IActionResult> LinkSteamAccount([FromBody] string steamId)

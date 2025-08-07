@@ -7,6 +7,7 @@ namespace GameNewsBoard.Application.IServices.ISteam
     {
         Task<SteamUserProfileResponse?> GetCompleteSteamUserProfileAsync(string steamId);
         Task<SteamUserProfileResponse?> GetCompleteSteamUserProfileAsync(Guid userId);
+        Task<SteamUserProfileResponse?> GetSteamUserProfileWithGamesAsync(Guid userId);
         Task<Result> LinkSteamAccountAsync(Guid userId, string steamId);
     }
 }

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using AutoMapper;
+using GameNewsBoard.Application.DTOs;
 using GameNewsBoard.Application.DTOs.Responses.Steam;
 using GameNewsBoard.Application.IServices.ISteam;
 using GameNewsBoard.Infrastructure.Configurations.Settings;
@@ -77,7 +78,9 @@ namespace GameNewsBoard.Infrastructure.Services.Steam
                 var json = await response.Content.ReadAsStringAsync();
                 var dto = JsonSerializer.Deserialize<SteamOwnedGamesResponseDto>(json);
 
-                return _mapper.Map<List<OwnedGameResponse>>(dto?.Response.Games) ?? new();
+                var rawGames = _mapper.Map<List<RawSteamGameDto>>(dto.Response.Games);
+                var result = _mapper.Map<List<OwnedGameResponse>>(rawGames);
+                return result;
             }
             catch (Exception ex)
             {
@@ -88,21 +91,48 @@ namespace GameNewsBoard.Infrastructure.Services.Steam
 
         public async Task<List<SteamAchievementResponse>> GetPlayerAchievementsAsync(string steamId, int appId)
         {
+            var url = SteamApiUrlBuilder.GetPlayerAchievementsUrl(_apiKey, steamId, appId);
+
             try
             {
-                var url = SteamApiUrlBuilder.GetPlayerAchievementsUrl(_apiKey, steamId, appId);
                 var response = await _httpClient.GetAsync(url);
-
-                response.EnsureSuccessStatusCode();
-
                 var json = await response.Content.ReadAsStringAsync();
-                var dto = JsonSerializer.Deserialize<SteamPlayerAchievementsResponseDto>(json);
 
-                return _mapper.Map<List<SteamAchievementResponse>>(dto?.PlayerStats.Achievements) ?? new();
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogDebug("Jogo sem conquistas ou erro na API. SteamId: {SteamId}, AppId: {AppId}, StatusCode: {StatusCode}, Url: {Url}",
+                        steamId, appId, response.StatusCode, url);
+                    return new();
+                }
+
+                var dto = JsonSerializer.Deserialize<SteamPlayerAchievementsResponseDto>(json);
+                return _mapper.Map<List<SteamAchievementResponse>>(dto?.PlayerStats?.Achievements) ?? new();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao obter conquistas para SteamId: {SteamId}, AppId: {AppId}", steamId, appId);
+                _logger.LogError(ex, "Erro inesperado ao obter conquistas. SteamId: {SteamId}, AppId: {AppId}, Url: {Url}", steamId, appId, url);
+                return new();
+            }
+        }
+
+        public async Task<Dictionary<string, double>> GetGlobalAchievementPercentagesAsync(int appId)
+        {
+            var url = SteamApiUrlBuilder.GetGlobalAchievementsUrl(_apiKey, appId);
+
+            try
+            {
+                var response = await _httpClient.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+
+                var json = await response.Content.ReadAsStringAsync();
+                var dto = JsonSerializer.Deserialize<SteamGlobalAchievementsResponseDto>(json);
+
+                var list = dto?.Response.Achievementpercentages ?? new();
+                return list.ToDictionary(a => a.Name, a => a.Percent);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao obter conquistas globais para AppId: {AppId}", appId);
                 return new();
             }
         }

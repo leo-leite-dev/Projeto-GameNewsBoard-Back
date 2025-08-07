@@ -10,5 +10,8 @@ namespace GameNewsBoard.Infrastructure.External.Igdb.Steam
 
         public static string GetPlayerAchievementsUrl(string apiKey, string steamId, int appId) =>
             $"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key={apiKey}&steamid={steamId}&appid={appId}";
+
+        public static string GetGlobalAchievementsUrl(string apiKey, int appId) =>
+                  $"https://api.steampowered.com/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/?key={apiKey}&gameid={appId}";
     }
 }
